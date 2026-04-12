@@ -19,7 +19,7 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const user = await register(name, email, password, phone);
+      const user = await register(email, password, name, phone);
 
       if (user) {
         router.push(`/dashboard/${user.role}`);

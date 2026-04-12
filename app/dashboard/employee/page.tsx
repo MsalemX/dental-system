@@ -23,13 +23,12 @@ export default function EmployeeDashboard() {
   const [isBillModalOpen, setIsBillModalOpen] = useState(false);
   const [billForm, setBillForm] = useState({ patientId: '', patientName: '', doctorName: '', serviceName: '', amount: 0, discount: 0, total: 0, status: 'unpaid' as 'unpaid' | 'paid', date: new Date().toISOString().split('T')[0] });
 
-  const refresh = () => {
+  const refresh = async () => {
     setAppointments(getAppointments());
     setBills(getBills());
-    const all = getAllUsers();
-    const usersArray = Object.entries(all).map(([id, d]: any) => ({ id, ...d }));
-    setPatients(usersArray.filter(u => u.role === 'patient'));
-    setDoctors(usersArray.filter(u => u.role === 'doctor'));
+    const allUsers = await getAllUsers();
+    setPatients(allUsers.filter((u: any) => u.role === 'patient'));
+    setDoctors(allUsers.filter((u: any) => u.role === 'doctor'));
     setServices(getServices());
   };
 

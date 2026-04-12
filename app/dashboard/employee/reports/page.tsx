@@ -11,10 +11,13 @@ export default function EmployeeDailyReports() {
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    setBills(getBills());
-    setAppointments(getAppointments());
-    const users = getAllUsers();
-    setPatients(Object.entries(users).filter(([_, u]: any) => u.role === 'patient').map(([id, u]: any) => ({ id, ...u })));
+    const fetchData = async () => {
+      setBills(getBills());
+      setAppointments(getAppointments());
+      const users = await getAllUsers();
+      setPatients(users.filter((u: any) => u.role === 'patient'));
+    };
+    fetchData();
   }, []);
 
   const stats = useMemo(() => {

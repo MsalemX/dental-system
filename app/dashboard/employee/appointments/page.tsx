@@ -40,11 +40,13 @@ export default function EmployeeAppointments() {
   const refresh = () => setAppointments(getAppointments());
 
   useEffect(() => {
-    refresh();
-    const allUsers = getAllUsers();
-    const entries = Object.entries(allUsers).map(([id, d]: any) => ({ id, ...d }));
-    setDoctors(entries.filter(u => u.role === 'doctor'));
-    setPatients(entries.filter(u => u.role === 'patient'));
+    const fetchData = async () => {
+      refresh();
+      const allUsers = await getAllUsers();
+      setDoctors(allUsers.filter((u: any) => u.role === 'doctor'));
+      setPatients(allUsers.filter((u: any) => u.role === 'patient'));
+    };
+    fetchData();
   }, []);
 
   const filtered = useMemo(() => {

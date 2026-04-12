@@ -13,14 +13,15 @@ export default function AdminPatients() {
   const router = useRouter();
 
   useEffect(() => {
-    const allUsers = getAllUsers();
-    const patientUsers = Object.entries(allUsers)
-      .filter(([id, u]: any) => u.role === 'patient')
-      .map(([id, u]: any) => ({ id, ...u }));
-    
-    setPatients(patientUsers);
-    setAppointments(getAppointments());
-    setBills(getBills());
+    const fetchData = async () => {
+      const allUsers = await getAllUsers();
+      const patientUsers = allUsers.filter((u: User) => u.role === 'patient');
+      
+      setPatients(patientUsers);
+      setAppointments(getAppointments());
+      setBills(getBills());
+    };
+    fetchData();
   }, []);
 
   const filteredPatients = useMemo(() => {

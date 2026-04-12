@@ -96,12 +96,13 @@ export const login = async (email: string, pass: string): Promise<User | null> =
 /**
  * Register a new user (Local)
  */
-export const register = async (email: string, pass: string, name: string, role: UserRole = 'patient'): Promise<User | null> => {
+export const register = async (email: string, pass: string, name: string, phone: string, role: UserRole = 'patient'): Promise<User | null> => {
   const user: User = {
     id: `u_${Date.now()}`,
     name,
     email,
     role,
+    phone,
     status: 'active'
   };
   

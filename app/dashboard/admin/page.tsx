@@ -21,7 +21,7 @@ export default function AdminDashboard() {
 
   const refreshUsers = async () => {
     const allUsers = await getAllUsers();
-    setUsers(Object.entries(allUsers).map(([id, data]: [string, any]) => ({ id, ...data })));
+    setUsers(allUsers);
   };
 
   useEffect(() => {

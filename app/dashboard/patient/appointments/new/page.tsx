@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { addAppointment, getAppointments } from "../../../../lib/data";
-import { getSession, getAllUsers } from "../../../../lib/auth";
+import { getSession, getAllUsers, getUsersByRole } from "../../../../lib/auth";
 
 export default function PatientNewAppointment() {
   const router = useRouter();

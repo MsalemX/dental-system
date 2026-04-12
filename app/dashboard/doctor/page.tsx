@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getAppointments, updateAppointmentStatus, getBills, addBill, Appointment, Bill } from "../../lib/data";
-import { getSession, updateUserProfile, getAllUsers, User } from "../../lib/auth";
+import { getSession, updateUserProfile, getAllUsers, getUsersByRole, User } from "../../lib/auth";
 import { addNotification } from "../../lib/notifications";
 
 export default function DoctorDashboard() {

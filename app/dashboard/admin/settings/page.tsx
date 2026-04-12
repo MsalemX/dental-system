@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSession, updateUser, User, getAllUsers } from "../../../lib/auth";
+import { getSession, updateUser, User, getAllUsers, changePassword } from "../../../lib/auth";
 import { clearAllNotifications } from "../../../lib/notifications";
 import { getClinicSettings } from "../../../lib/clinic";
 

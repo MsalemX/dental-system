@@ -37,12 +37,13 @@ export default function AdminAppointments() {
   const refresh = () => setAppointments(getAppointments());
 
   useEffect(() => {
-    refresh();
-    const allUsers = getAllUsers();
-    const docs = Object.entries(allUsers)
-      .filter(([_, d]: any) => d.role === 'doctor')
-      .map(([id, d]: any) => ({ id, ...d }));
-    setDoctors(docs);
+    const fetchDoctors = async () => {
+      refresh();
+      const allUsers = await getAllUsers();
+      const docs = allUsers.filter((u: any) => u.role === 'doctor');
+      setDoctors(docs);
+    };
+    fetchDoctors();
   }, []);
 
   const filtered = useMemo(() => {

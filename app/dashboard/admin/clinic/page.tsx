@@ -13,14 +13,15 @@ export default function ClinicManagement() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setSettings(getClinicSettings());
-    setRooms(getRooms());
-    
-    const allUsers = getAllUsers();
-    const allDoctors = Object.entries(allUsers)
-      .filter(([_, data]: [string, any]) => data.role === 'doctor')
-      .map(([id, data]: [string, any]) => ({ id, ...data }));
-    setDoctors(allDoctors);
+    const fetchData = async () => {
+      setSettings(getClinicSettings());
+      setRooms(getRooms());
+      
+      const allUsers = await getAllUsers();
+      const allDoctors = allUsers.filter((u: any) => u.role === 'doctor');
+      setDoctors(allDoctors);
+    };
+    fetchData();
   }, []);
 
   const handleSaveSettings = (e: React.FormEvent) => {

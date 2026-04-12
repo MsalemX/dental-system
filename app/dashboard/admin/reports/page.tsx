@@ -34,11 +34,14 @@ export default function AdminReports() {
   const [allUsers, setAllUsers] = useState<any[]>([]);
 
   useEffect(() => {
-    setBills(getBills());
-    setExpenses(getExpenses());
-    setAppointments(getAppointments());
-    const users = getAllUsers();
-    setAllUsers(Object.entries(users).map(([id, d]: any) => ({ id, ...d })));
+    const fetchData = async () => {
+      setBills(getBills());
+      setExpenses(getExpenses());
+      setAppointments(getAppointments());
+      const users = await getAllUsers();
+      setAllUsers(users);
+    };
+    fetchData();
   }, []);
 
   // ── Financial Report ─────────────────────────────────────

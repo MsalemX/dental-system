@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAppointments, addAppointment, updateAppointment, deleteAppointment, getBills, Appointment, Bill, getMedicalRecords, MedicalRecord } from "../../lib/data";
 import { getNotifications, Notification as NotificationType } from "../../lib/notifications";
-import { getSession, getAllUsers, User } from "../../lib/auth";
+import { getSession, getAllUsers, getUsersByRole, User } from "../../lib/auth";
 
 export default function PatientDashboard() {
   const router = useRouter();

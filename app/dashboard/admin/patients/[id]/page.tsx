@@ -19,20 +19,23 @@ export default function PatientProfile() {
   const [editForm, setEditForm] = useState({ name: "", phone: "", age: "", gender: "male" });
 
   useEffect(() => {
-    const allUsers = getAllUsers();
-    const foundPatient = allUsers[patientId] || Object.values(allUsers).find((u: any) => u.id === patientId);
-    
-    if (foundPatient) {
-      setPatient({ id: patientId, ...foundPatient } as User);
-      setEditForm({ 
-        name: foundPatient.name || "", 
-        phone: foundPatient.phone || "", 
-        age: foundPatient.age || "", 
-        gender: foundPatient.gender || "male" as any
-      });
-      setAppointments(getAppointments().filter(a => a.patientId === patientId || a.patientName === foundPatient?.name));
-      setBills(getBills().filter(b => b.patientId === patientId || b.patientName === foundPatient?.name));
-    }
+    const fetchPatient = async () => {
+      const allUsers = await getAllUsers();
+      const foundPatient = allUsers.find((u: User) => u.id === patientId);
+      
+      if (foundPatient) {
+        setPatient(foundPatient);
+        setEditForm({ 
+          name: foundPatient.name || "", 
+          phone: foundPatient.phone || "", 
+          age: foundPatient.age || "", 
+          gender: (foundPatient.gender || "male") as any
+        });
+        setAppointments(getAppointments().filter(a => a.patientId === patientId || a.patientName === foundPatient.name));
+        setBills(getBills().filter(b => b.patientId === patientId || b.patientName === foundPatient.name));
+      }
+    };
+    fetchPatient();
   }, [patientId]);
 
   const handleUpdatePatient = (e: React.FormEvent) => {

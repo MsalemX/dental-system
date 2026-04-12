@@ -41,13 +41,15 @@ export default function AdminBilling() {
   const refresh = () => setBills(getBills());
 
   useEffect(() => {
-    refresh();
-    const allUsers = getAllUsers();
-    const entries = Object.entries(allUsers).map(([id, d]: any) => ({ id, ...d }));
-    setPatients(entries.filter(u => u.role === 'patient'));
-    setDoctors(entries.filter(u => u.role === 'doctor'));
-    setServices(getServices());
-    setClinicName(getClinicSettings().name);
+    const fetchData = async () => {
+      refresh();
+      const allUsers = await getAllUsers();
+      setPatients(allUsers.filter((u: any) => u.role === 'patient'));
+      setDoctors(allUsers.filter((u: any) => u.role === 'doctor'));
+      setServices(getServices());
+      setClinicName(getClinicSettings().name);
+    };
+    fetchData();
   }, []);
 
   const filtered = useMemo(() =>
