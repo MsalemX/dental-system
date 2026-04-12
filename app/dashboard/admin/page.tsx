@@ -19,8 +19,8 @@ export default function AdminDashboard() {
     password: ''
   });
 
-  const refreshUsers = () => {
-    const allUsers = getAllUsers();
+  const refreshUsers = async () => {
+    const allUsers = await getAllUsers();
     setUsers(Object.entries(allUsers).map(([id, data]: [string, any]) => ({ id, ...data })));
   };
 
@@ -28,25 +28,25 @@ export default function AdminDashboard() {
     refreshUsers();
   }, []);
 
-  const handleAddUser = (e: React.FormEvent) => {
+  const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      adminAddUser(formData);
+      await adminAddUser(formData);
       setIsAddModalOpen(false);
       setFormData({ name: '', email: '', phone: '', role: 'doctor', specialty: '', password: '' });
-      refreshUsers();
+      await refreshUsers();
     } catch (err: any) {
       alert(err.message);
     }
   };
 
-  const handleEditUser = (e: React.FormEvent) => {
+  const handleEditUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (currentUser) {
-      adminUpdateUser(currentUser.id, formData);
+      await adminUpdateUser(currentUser.id, formData);
       setIsEditModalOpen(false);
       setCurrentUser(null);
-      refreshUsers();
+      await refreshUsers();
     }
   };
 
@@ -65,11 +65,11 @@ export default function AdminDashboard() {
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (deletingId === id) {
-      deleteUser(id);
+      await deleteUser(id);
       setDeletingId(null);
-      refreshUsers();
+      await refreshUsers();
     } else {
       setDeletingId(id);
       // Reset after 3 seconds if not confirmed
@@ -77,9 +77,9 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleToggleStatus = (id: string) => {
-    toggleUserStatus(id);
-    refreshUsers();
+  const handleToggleStatus = async (id: string) => {
+    await toggleUserStatus(id);
+    await refreshUsers();
   };
 
   return (

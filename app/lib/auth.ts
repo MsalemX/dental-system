@@ -1,4 +1,3 @@
-import { supabase } from './supabase';
 
 export type UserRole = 'admin' | 'doctor' | 'employee' | 'patient';
 
@@ -15,141 +14,134 @@ export interface User {
   gender?: string;
 }
 
+export const DEMO_ACCOUNTS = [
+  { email: 'admin@juman.com', password: 'admin123', name: 'مدير النظام', role: 'admin' },
+  { email: 'doctor@juman.com', password: 'doctor123', name: 'د. سارة محمود', role: 'doctor' },
+  { email: 'emp@juman.com', password: 'emp123', name: 'موظف استقبال', role: 'employee' },
+  { email: 'user@juman.com', password: 'user123', name: 'مريض', role: 'patient' }
+];
+
 /**
- * Gets the current active session and profile from Supabase
+ * Local-only Auth Helper
  */
-export const getSession = async (): Promise<User | null> => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return null;
+const getStoredUser = (): User | null => {
+  if (typeof window === 'undefined') return null;
+  const user = localStorage.getItem('juman_user');
+  return user ? JSON.parse(user) : null;
+};
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', session.user.id)
-    .single();
-
-  if (!profile) return null;
-
-  return {
-    id: profile.id,
-    name: profile.name,
-    email: profile.email,
-    role: profile.role,
-    phone: profile.phone,
-    specialty: profile.specialty,
-    bio: profile.bio,
-    status: profile.status,
-    age: profile.age?.toString(),
-    gender: profile.gender
-  };
+const setStoredUser = (user: User | null) => {
+  if (typeof window === 'undefined') return;
+  if (user) {
+    localStorage.setItem('juman_user', JSON.stringify(user));
+  } else {
+    localStorage.removeItem('juman_user');
+  }
 };
 
 /**
- * Gets all users from profiles table
+ * Gets the current session (Local)
+ */
+export const getSession = async (): Promise<User | null> => {
+  return getStoredUser();
+};
+
+/**
+ * Gets all users (Local - mostly demo accounts + any added later)
  */
 export const getAllUsers = async (): Promise<User[]> => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*');
+  if (typeof window === 'undefined') return [];
+  const extra = localStorage.getItem('juman_extra_users');
+  const extraUsers = extra ? JSON.parse(extra) : [];
   
-  if (error) return [];
-  return data.map(profile => ({
-    id: profile.id,
-    name: profile.name,
-    email: profile.email,
-    role: profile.role,
-    phone: profile.phone,
-    specialty: profile.specialty,
-    bio: profile.bio,
-    status: profile.status,
-    age: profile.age?.toString(),
-    gender: profile.gender
-  }));
+  return [
+    ...DEMO_ACCOUNTS.map((d, i) => ({
+      id: `demo_${d.role}`,
+      name: d.name,
+      email: d.email,
+      role: d.role as UserRole,
+      status: 'active' as const
+    })),
+    ...extraUsers
+  ];
 };
 
 /**
  * Get users by role
  */
 export const getUsersByRole = async (role: UserRole): Promise<User[]> => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('role', role);
-  
-  if (error) return [];
-  return data.map(profile => ({
-    id: profile.id,
-    name: profile.name,
-    email: profile.email,
-    role: profile.role,
-    phone: profile.phone,
-    specialty: profile.specialty,
-    bio: profile.bio,
-    status: profile.status,
-    age: profile.age?.toString(),
-    gender: profile.gender
-  }));
+  const all = await getAllUsers();
+  return all.filter(u => u.role === role);
 };
 
 /**
- * Log in with email and password
+ * Log in with email and password (Local)
  */
 export const login = async (email: string, pass: string): Promise<User | null> => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password: pass,
-  });
-
-  if (error || !data.user) return null;
-
-  // Profiles are synced via SQL Trigger, but we fetch to confirm
-  return getSession();
+  const demo = DEMO_ACCOUNTS.find(d => d.email === email && d.password === pass);
+  if (demo) {
+    const user: User = {
+      id: `demo_${demo.role}`,
+      name: demo.name,
+      email: demo.email,
+      role: demo.role as UserRole,
+      status: 'active'
+    };
+    setStoredUser(user);
+    return user;
+  }
+  return null;
 };
 
 /**
- * Register a new user (with profile)
+ * Register a new user (Local)
  */
 export const register = async (email: string, pass: string, name: string, role: UserRole = 'patient'): Promise<User | null> => {
-  const { data, error } = await supabase.auth.signUp({
+  const user: User = {
+    id: `u_${Date.now()}`,
+    name,
     email,
-    password: pass,
-    options: {
-      data: {
-        full_name: name,
-        role: role
-      }
-    }
-  });
-
-  if (error || !data.user) return null;
-
-  // Profile is created by DB trigger, we just return the user session
-  return getSession();
+    role,
+    status: 'active'
+  };
+  
+  // Store in extra users
+  const all = await getAllUsers();
+  const extra = all.filter(u => !u.id.startsWith('demo_'));
+  localStorage.setItem('juman_extra_users', JSON.stringify([...extra, user]));
+  
+  setStoredUser(user);
+  return user;
 };
 
 /**
- * Change current user password
+ * Change current user password (Mock)
  */
 export const changePassword = async (newPassword: string): Promise<{ success: boolean; error?: string }> => {
-  const { error } = await supabase.auth.updateUser({ password: newPassword });
-  if (error) return { success: false, error: error.message };
   return { success: true };
 };
 
 /**
- * Update user profile
+ * Update user profile (Local)
  */
 export const updateUser = async (id: string, data: Partial<User>) => {
-  const { error } = await supabase
-    .from('profiles')
-    .update(data)
-    .eq('id', id);
+  const currentUser = getStoredUser();
+  if (currentUser && currentUser.id === id) {
+    const updated = { ...currentUser, ...data };
+    setStoredUser(updated);
+  }
   
-  if (error) throw error;
+  // Update in extra users if exists
+  const extra = localStorage.getItem('juman_extra_users');
+  if (extra) {
+    const users = JSON.parse(extra);
+    const updated = users.map((u: any) => u.id === id ? { ...u, ...data } : u);
+    localStorage.setItem('juman_extra_users', JSON.stringify(updated));
+  }
 };
 
 /**
- * Admin: Add a new user (Staff or Patient)
+ * Admin: Add a new user (Local)
  */
 export const adminAddUser = async (data: { 
   name: string; 
@@ -159,30 +151,52 @@ export const adminAddUser = async (data: {
   specialty?: string; 
   password?: string;
 }) => {
-  // Using signUp or an edge function would be better for admin, 
-  // but for simplicity in this clinic setup, we can use signUp if it's allowed
-  const { data: authData, error: authError } = await supabase.auth.signUp({
+  const newUser: User = {
+    id: `u_${Date.now()}`,
+    name: data.name,
     email: data.email,
-    password: data.password || '123456',
-    options: {
-      data: {
-        name: data.name,
-        phone: data.phone,
-        role: data.role,
-        specialty: data.specialty
-      }
-    }
-  });
-
-  if (authError) throw authError;
-  return authData.user;
+    role: data.role,
+    phone: data.phone,
+    specialty: data.specialty,
+    status: 'active'
+  };
+  
+  const extraStr = localStorage.getItem('juman_extra_users');
+  const extra = extraStr ? JSON.parse(extraStr) : [];
+  localStorage.setItem('juman_extra_users', JSON.stringify([...extra, newUser]));
+  
+  return newUser;
 };
 
 /**
- * Log out
+ * Log out (Local)
  */
 export const logout = async () => {
-  await supabase.auth.signOut();
+  setStoredUser(null);
+};
+
+/**
+ * Admin: Delete a user (Local)
+ */
+export const deleteUser = async (id: string) => {
+  const extraStr = localStorage.getItem('juman_extra_users');
+  if (extraStr) {
+    const extra = JSON.parse(extraStr);
+    const filtered = extra.filter((u: any) => u.id !== id);
+    localStorage.setItem('juman_extra_users', JSON.stringify(filtered));
+  }
+};
+
+/**
+ * Admin: Toggle user status (Local)
+ */
+export const toggleUserStatus = async (id: string) => {
+  const extraStr = localStorage.getItem('juman_extra_users');
+  if (extraStr) {
+    const extra = JSON.parse(extraStr);
+    const updated = extra.map((u: any) => u.id === id ? { ...u, status: u.status === 'inactive' ? 'active' : 'inactive' } : u);
+    localStorage.setItem('juman_extra_users', JSON.stringify(updated));
+  }
 };
 
 export const updateUserProfile = updateUser;

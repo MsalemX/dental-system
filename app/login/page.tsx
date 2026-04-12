@@ -2,14 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "../lib/auth";
+import { login, DEMO_ACCOUNTS } from "../lib/auth";
 
-const DEMO_ACCOUNTS = [
-  { role: 'admin', label: 'مدير النظام', email: 'admin@juman.com', password: 'admin123', icon: '👨‍💼', color: 'bg-amber-50 border-amber-200 text-amber-700' },
-  { role: 'doctor', label: 'طبيب', email: 'doctor@juman.com', password: 'doctor123', icon: '👨‍⚕️', color: 'bg-blue-50 border-blue-200 text-blue-700' },
-  { role: 'employee', label: 'موظف استقبال', email: 'emp@juman.com', password: 'emp123', icon: '🧑‍💻', color: 'bg-violet-50 border-violet-200 text-violet-700' },
-  { role: 'patient', label: 'مريض', email: 'user@juman.com', password: 'user123', icon: '🧑', color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
-];
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -20,10 +14,21 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    performLogin(email, password);
+  };
+
+  const handleQuickLogin = async (role: string) => {
+    const account = DEMO_ACCOUNTS.find(a => a.role === role);
+    if (account) {
+      performLogin(account.email, account.password);
+    }
+  };
+
+  const performLogin = async (email: string, pass: string) => {
     setLoading(true);
     setError("");
     try {
-      const user = await login(email, password);
+      const user = await login(email, pass);
       if (user) {
         router.push(`/dashboard/${user.role}`);
       } else {
@@ -36,23 +41,12 @@ export default function LoginPage() {
     }
   };
 
-  const quickLogin = async (acc: typeof DEMO_ACCOUNTS[0]) => {
-    setEmail(acc.email);
-    setPassword(acc.password);
-    setError("");
-    setLoading(true);
-    try {
-      const user = await login(acc.email, acc.password);
-      if (user) router.push(`/dashboard/${user.role}`);
-      else { 
-        setError("خطأ في الدخول السريع - تأكد من إنشاء الحساب في Supabase"); 
-        setLoading(false); 
-      }
-    } catch (err) {
-      setError("حدث خطأ غير متوقع");
-      setLoading(false);
-    }
-  };
+  const ROLES = [
+    { id: 'admin', label: 'مدير', icon: '🛡️', color: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
+    { id: 'doctor', label: 'طبيب', icon: '👨‍⚕️', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+    { id: 'employee', label: 'موظف', icon: '👥', color: 'bg-amber-50 text-amber-600 border-amber-100' },
+    { id: 'patient', label: 'مريض', icon: '👤', color: 'bg-rose-50 text-rose-600 border-rose-100' },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
@@ -62,20 +56,6 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md space-y-6">
 
-        {/* Quick Login Cards */}
-        <div className="bg-white/80 backdrop-blur p-5 rounded-[2rem] border border-slate-100 shadow-lg">
-          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 text-center">⚡ دخول سريع — اختر دورك</p>
-          <div className="grid grid-cols-2 gap-2">
-            {DEMO_ACCOUNTS.map(acc => (
-              <button key={acc.role} onClick={() => quickLogin(acc)}
-                className={`p-3 rounded-2xl border-2 text-right transition-all hover:scale-[1.02] active:scale-95 ${acc.color}`}>
-                <div className="text-xl mb-1">{acc.icon}</div>
-                <div className="font-black text-xs leading-tight">{acc.label}</div>
-                <div className="text-[10px] opacity-70 mt-0.5 font-bold truncate">{acc.email}</div>
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Login Form */}
         <div className="glass p-10 rounded-[3rem] shadow-2xl border border-white/40 space-y-8">
@@ -130,6 +110,29 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          {/* Quick Login Section */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-4">
+              <div className="h-px bg-slate-100 flex-1"></div>
+              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">الدخول السريع (للتجربة)</span>
+              <div className="h-px bg-slate-100 flex-1"></div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {ROLES.map(role => (
+                <button
+                  key={role.id}
+                  onClick={() => handleQuickLogin(role.id)}
+                  disabled={loading}
+                  className={`group p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all hover:scale-[1.03] active:scale-95 ${role.color}`}
+                >
+                  <span className="text-2xl group-hover:scale-110 transition-transform">{role.icon}</span>
+                  <span className="text-xs font-black">{role.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="text-center pt-4 space-y-4">
             <p className="text-slate-500 text-sm font-medium">

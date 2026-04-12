@@ -26,12 +26,63 @@ export interface Bill {
 }
 
 const INITIAL_APPOINTMENTS: Appointment[] = [
-  { id: 'app_1', patientId: 'patient', patientName: 'فهد المريض', doctor: 'د. سارة محمود', date: '2026-04-15', time: '10:30 ص', status: 'confirmed', type: 'تقويم أسنان' },
-  { id: 'app_2', patientId: 'patient', patientName: 'فهد المريض', doctor: 'د. ياسر العتيبي', date: '2026-03-02', time: '04:15 م', status: 'completed', type: 'كشف دوري' },
+  { id: 'app_1', patientId: 'patient_1', patientName: 'فهد العتيبي', doctor: 'د. سارة محمود', date: '2026-04-15', time: '10:30 ص', status: 'confirmed', type: 'تقويم أسنان' },
+  { id: 'app_2', patientId: 'patient_2', patientName: 'سارة الشمري', doctor: 'د. ياسر العتيبي', date: '2026-04-15', time: '11:15 ص', status: 'pending', type: 'تنظيف أسنان' },
+  { id: 'app_3', patientId: 'patient_3', patientName: 'محمد القحطاني', doctor: 'د. ليلي خالد', date: '2026-04-15', time: '01:00 م', status: 'arrived', type: 'خلع ضرس' },
+  { id: 'app_4', patientId: 'patient_4', patientName: 'نورة الدوسري', doctor: 'د. أحمد سليمان', date: '2026-04-16', time: '09:00 ص', status: 'confirmed', type: 'حشوات تجميلية' },
+  { id: 'app_5', patientId: 'patient_5', patientName: 'عبدالله العنزي', doctor: 'د. سارة محمود', date: '2026-04-16', time: '02:30 م', status: 'pending', type: 'كشف دوري' },
+  { id: 'app_6', patientId: 'patient_6', patientName: 'ريم المطيري', doctor: 'د. ياسر العتيبي', date: '2026-04-17', time: '10:00 ص', status: 'confirmed', type: 'تبييض أسنان' },
+  { id: 'app_7', patientId: 'patient_7', patientName: 'خالد الزهراني', doctor: 'د. ليلي خالد', date: '2026-04-12', time: '04:00 م', status: 'completed', type: 'تركيبات' },
+  { id: 'app_8', patientId: 'patient_8', patientName: 'هيا السبيعي', doctor: 'د. أحمد سليمان', date: '2026-04-12', time: '11:30 ص', status: 'no-show', type: 'كشف دوري' },
+  { id: 'app_9', patientId: 'patient_9', patientName: 'سلطان الحربي', doctor: 'د. سارة محمود', date: '2026-04-10', time: '01:30 م', status: 'completed', type: 'علاج عصب' },
+  { id: 'app_10', patientId: 'patient_10', patientName: 'مروج الغامدي', doctor: 'د. ياسر العتيبي', date: '2026-04-11', time: '05:00 م', status: 'cancelled', type: 'تنظيف أسنان' },
 ];
 
 const INITIAL_BILLS: Bill[] = [
-  { id: 'bill_1', patientId: 'patient', patientName: 'فهد المريض', doctorName: 'د. سارة محمود', serviceName: 'تقويم أسنان', amount: 500, discount: 0, total: 500, status: 'unpaid', date: '2026-04-15' },
+  { id: 'bill_1', patientId: 'patient_1', patientName: 'فهد العتيبي', doctorName: 'د. سارة محمود', serviceName: 'تقويم أسنان', amount: 500, discount: 50, total: 450, status: 'unpaid', date: '2026-04-15' },
+  { id: 'bill_2', patientId: 'patient_7', patientName: 'خالد الزهراني', doctorName: 'د. ليلي خالد', serviceName: 'تركيبات', amount: 1200, discount: 100, total: 1100, status: 'paid', date: '2026-04-12' },
+  { id: 'bill_3', patientId: 'patient_9', patientName: 'سلطان الحربي', doctorName: 'د. سارة محمود', serviceName: 'علاج عصب', amount: 800, discount: 0, total: 800, status: 'paid', date: '2026-04-10' },
+  { id: 'bill_4', patientId: 'patient_3', patientName: 'محمد القحطاني', doctorName: 'د. ليلي خالد', serviceName: 'خلع ضرس', amount: 350, discount: 0, total: 350, status: 'unpaid', date: '2026-04-15' },
+  { id: 'bill_5', patientId: 'patient_4', patientName: 'نورة الدوسري', doctorName: 'د. أحمد سليمان', serviceName: 'حشوات تجميلية', amount: 450, discount: 45, total: 405, status: 'unpaid', date: '2026-04-16' },
+];
+
+const INITIAL_RECORDS: MedicalRecord[] = [
+  { 
+    id: 'rec_1', 
+    patientId: 'patient_1', 
+    patientName: 'فهد العتيبي', 
+    doctorId: 'doctor_1', 
+    doctorName: 'د. سارة محمود', 
+    date: '2026-04-10', 
+    diagnosis: 'تسوس عميق في الضرس العلوي الأيمن', 
+    treatment: 'تنظيف التسوس ووضع حشوة مؤقتة', 
+    notes: 'يحتاج لمراجعة بعد أسبوع لاستكمال الحشوة الدائمة',
+    procedures: [{ id: 'proc_1', service: 'كشف وحشوة مؤقتة', price: 200, notes: '' }]
+  },
+  { 
+    id: 'rec_2', 
+    patientId: 'patient_9', 
+    patientName: 'سلطان الحربي', 
+    doctorId: 'doctor_1', 
+    doctorName: 'د. سارة محمود', 
+    date: '2026-04-10', 
+    diagnosis: 'التهاب في العصب', 
+    treatment: 'بدء علاج العصب وتنظيف القنوات', 
+    notes: 'تم صرف مضاد حيوي ومسكن',
+    procedures: [{ id: 'proc_2', service: 'علاج عصب - مرحلة أولى', price: 400, notes: '' }]
+  },
+  { 
+    id: 'rec_3', 
+    patientId: 'patient_7', 
+    patientName: 'خالد الزهراني', 
+    doctorId: 'doctor_2', 
+    doctorName: 'د. ليلي خالد', 
+    date: '2026-04-12', 
+    diagnosis: 'فقدان الضرس رقم 14', 
+    treatment: 'تركيب جسر ثابت', 
+    notes: 'الجسر مركب بنجاح والمريض مرتاح للنتيجة',
+    procedures: [{ id: 'proc_3', service: 'تركيب جسر ثابت', price: 1200, notes: '' }]
+  }
 ];
 
 export const getAppointments = (): Appointment[] => {
@@ -152,9 +203,9 @@ export interface MedicalRecord {
 }
 
 export const getMedicalRecords = (): MedicalRecord[] => {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === 'undefined') return INITIAL_RECORDS;
   const stored = localStorage.getItem('juman_records');
-  return stored ? JSON.parse(stored) : [];
+  return stored ? JSON.parse(stored) : INITIAL_RECORDS;
 };
 
 export const addMedicalRecord = (record: Omit<MedicalRecord, 'id' | 'date'>) => {
