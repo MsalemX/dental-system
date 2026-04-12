@@ -28,30 +28,34 @@ export default function DoctorDashboard() {
   const [debtForm, setDebtForm] = useState({ patientId: '', patientName: '', amount: 0, reason: '', notify: true });
 
   useEffect(() => {
-    const session = getSession();
-    setAppointments(getAppointments());
-    setBills(getBills());
-    setUser(session);
-    if (session) {
-      setEditData({ 
-        name: session.name || "", 
-        specialty: session.specialty || "", 
-        phone: session.phone || "", 
-        bio: session.bio || "" 
-      });
-    }
+    const init = async () => {
+      const session = await getSession();
+      setAppointments(getAppointments());
+      setBills(getBills());
+      setUser(session);
+      if (session) {
+        setEditData({ 
+          name: session.name || "", 
+          specialty: session.specialty || "", 
+          phone: session.phone || "", 
+          bio: session.bio || "" 
+        });
+      }
 
-    const allUsers = getAllUsers();
-    setPatients(Object.entries(allUsers).map(([id, d]: any) => ({ id, ...d })).filter(u => u.role === 'patient'));
-    const stored = localStorage.getItem('juman_medical_files');
-    setSavedFiles(stored ? JSON.parse(stored) : []);
+      const allPatients = await getUsersByRole('patient');
+      setPatients(allPatients);
+      const stored = localStorage.getItem('juman_medical_files');
+      setSavedFiles(stored ? JSON.parse(stored) : []);
+    };
+    init();
   }, []);
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (user) {
-      updateUserProfile(user.id, editData);
-      setUser(getSession());
+      await updateUserProfile(user.id, editData);
+      const updated = await getSession();
+      setUser(updated);
       setIsEditing(false);
     }
   };

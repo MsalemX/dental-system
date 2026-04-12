@@ -18,27 +18,40 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const user = login(email, password);
-    if (user) {
-      router.push(`/dashboard/${user.role}`);
-    } else {
-      setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+    try {
+      const user = await login(email, password);
+      if (user) {
+        router.push(`/dashboard/${user.role}`);
+      } else {
+        setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+        setLoading(false);
+      }
+    } catch (err) {
+      setError("حدث خطأ أثناء تسجيل الدخول");
       setLoading(false);
     }
   };
 
-  const quickLogin = (acc: typeof DEMO_ACCOUNTS[0]) => {
+  const quickLogin = async (acc: typeof DEMO_ACCOUNTS[0]) => {
     setEmail(acc.email);
     setPassword(acc.password);
     setError("");
     setLoading(true);
-    const user = login(acc.email, acc.password);
-    if (user) router.push(`/dashboard/${user.role}`);
-    else { setError("خطأ في الدخول السريع"); setLoading(false); }
+    try {
+      const user = await login(acc.email, acc.password);
+      if (user) router.push(`/dashboard/${user.role}`);
+      else { 
+        setError("خطأ في الدخول السريع - تأكد من إنشاء الحساب في Supabase"); 
+        setLoading(false); 
+      }
+    } catch (err) {
+      setError("حدث خطأ غير متوقع");
+      setLoading(false);
+    }
   };
 
   return (

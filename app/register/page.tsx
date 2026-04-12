@@ -13,17 +13,22 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const user = register(name, email, password, phone);
+    try {
+      const user = await register(name, email, password, phone);
 
-    if (user) {
-      router.push(`/dashboard/${user.role}`);
-    } else {
-      setError("البريد الإلكتروني مسجل مسبقاً");
+      if (user) {
+        router.push(`/dashboard/${user.role}`);
+      } else {
+        setError("فشل إنشاء الحساب - البريد الإلكتروني قد يكون مسجلاً مسبقاً أو كلمة المرور ضعيفة");
+        setLoading(false);
+      }
+    } catch (err) {
+      setError("حدث خطأ غير متوقع أثناء التسجيل");
       setLoading(false);
     }
   };

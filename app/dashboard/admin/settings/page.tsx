@@ -47,9 +47,12 @@ export default function AdminSettings() {
   const [pwSuccess, setPwSuccess] = useState(false);
 
   useEffect(() => {
-    const session = getSession();
-    if (session) setUser(session);
-    setSettings(getSystemSettings());
+    const init = async () => {
+      const session = await getSession();
+      if (session) setUser(session);
+      setSettings(getSystemSettings());
+    };
+    init();
   }, []);
 
   const handleSaveSettings = () => {
@@ -58,16 +61,20 @@ export default function AdminSettings() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleChangePassword = (e: React.FormEvent) => {
+  const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPwError('');
     if (!user) return;
-    const usersDB = getAllUsers();
-    const realUser = usersDB[user.id];
-    if (!realUser || currentPw !== realUser.password) { setPwError('كلمة المرور الحالية غير صحيحة'); return; }
+    
     if (newPw.length < 6) { setPwError('كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل'); return; }
     if (newPw !== confirmPw) { setPwError('كلمة المرور الجديدة غير متطابقة'); return; }
-    updateUser(user.id, { password: newPw });
+    
+    const result = await changePassword(newPw);
+    if (!result.success) {
+      setPwError(result.error || 'حدث خطأ أثناء تحديث كلمة المرور');
+      return;
+    }
+
     setPwSuccess(true);
     setCurrentPw(''); setNewPw(''); setConfirmPw('');
     setTimeout(() => setPwSuccess(false), 3000);

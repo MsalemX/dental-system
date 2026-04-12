@@ -22,19 +22,20 @@ export default function PatientDashboard() {
   const [editingApp, setEditingApp] = useState<Appointment | null>(null);
 
   useEffect(() => {
-    const allUsers = getAllUsers();
-    const drs = Object.entries(allUsers)
-      .filter(([id, u]: [string, any]) => u.role === 'doctor')
-      .map(([id, u]: [string, any]) => ({ id, ...u }));
-    
-    setDoctors(drs);
-    if (drs.length > 0) setSelectedDoctor(drs[0].name);
-    
-    setAppointments(getAppointments());
-    setBills(getBills());
-    setRecords(getMedicalRecords());
-    setNotifications(getNotifications());
-    setUser(getSession());
+    const init = async () => {
+      const allDoctors = await getUsersByRole('doctor');
+      setDoctors(allDoctors);
+      if (allDoctors.length > 0) setSelectedDoctor(allDoctors[0].name);
+      
+      setAppointments(getAppointments());
+      setBills(getBills());
+      setRecords(getMedicalRecords());
+      setNotifications(getNotifications());
+      
+      const session = await getSession();
+      setUser(session);
+    };
+    init();
   }, []);
 
   const openNewApp = () => {

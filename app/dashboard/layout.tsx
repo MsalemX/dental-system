@@ -18,23 +18,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const refreshNotifs = () => setNotifications(getNotifications());
 
   useEffect(() => {
-    const session = getSession();
-    setClinic(getClinicSettings());
-    refreshNotifs();
+    let active = true;
+    
+    const checkSession = async () => {
+      const session = await getSession();
+      if (!active) return;
 
-    if (!session) {
-      router.push("/login");
-    } else {
-      setUser(session);
-      const roleInPath = pathname.split('/')[2];
-      if (roleInPath && roleInPath !== session.role) {
-        router.push(`/dashboard/${session.role}`);
+      setClinic(getClinicSettings());
+      refreshNotifs();
+
+      if (!session) {
+        router.push("/login");
+      } else {
+        setUser(session);
+        const roleInPath = pathname.split('/')[2];
+        if (roleInPath && roleInPath !== session.role) {
+          router.push(`/dashboard/${session.role}`);
+        }
       }
-    }
+    };
+
+    checkSession();
 
     // Poll for new notifications every 10s
     const interval = setInterval(refreshNotifs, 10000);
-    return () => clearInterval(interval);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, [router, pathname]);
 
   // Close panel on outside click
@@ -48,8 +59,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push("/login");
   };
 

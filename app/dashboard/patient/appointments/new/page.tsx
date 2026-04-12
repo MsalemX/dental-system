@@ -20,16 +20,15 @@ export default function PatientNewAppointment() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const session = getSession();
-    setUser(session);
-    
-    const allUsers = getAllUsers();
-    const drs = Object.entries(allUsers)
-      .filter(([id, u]: [string, any]) => u.role === 'doctor')
-      .map(([id, u]: [string, any]) => ({ id, ...u }));
-    
-    setDoctors(drs);
-    if (drs.length > 0) setFormData(prev => ({ ...prev, doctor: drs[0].name }));
+    const init = async () => {
+      const session = await getSession();
+      setUser(session);
+      
+      const drs = await getUsersByRole('doctor');
+      setDoctors(drs);
+      if (drs.length > 0) setFormData(prev => ({ ...prev, doctor: drs[0].name }));
+    };
+    init();
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -15,33 +15,40 @@ export default function PatientProfile() {
   });
 
   useEffect(() => {
-    const session = getSession();
-    if (session) {
-      setUser(session);
-      setFormData({
-        name: session.name,
-        email: session.email,
-        phone: session.phone || '',
-        age: session.age?.toString() || '',
-        gender: session.gender || ''
-      });
-    }
+    const init = async () => {
+      const session = await getSession();
+      if (session) {
+        setUser(session);
+        setFormData({
+          name: session.name,
+          email: session.email,
+          phone: session.phone || '',
+          age: session.age?.toString() || '',
+          gender: session.gender || ''
+        });
+      }
+    };
+    init();
   }, []);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
-    updateUser(user.id, {
-      ...formData,
-      age: formData.age
-    });
+    try {
+      await updateUser(user.id, {
+        ...formData,
+        age: formData.age
+      });
 
-    setIsEditing(false);
-    // Refresh local user state
-    const updatedUser = getSession();
-    if (updatedUser) setUser(updatedUser);
-    alert('تم تحديث البيانات بنجاح ✅');
+      setIsEditing(false);
+      // Refresh local user state
+      const updatedUser = await getSession();
+      if (updatedUser) setUser(updatedUser);
+      alert('تم تحديث البيانات بنجاح ✅');
+    } catch (err) {
+      alert('حدث خطأ أثناء التحديث');
+    }
   };
 
   if (!user) return null;

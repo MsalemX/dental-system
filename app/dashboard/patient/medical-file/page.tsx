@@ -9,12 +9,15 @@ export default function PatientMedicalFile() {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const session = getSession();
-    setUser(session);
-    if (session) {
-      const allRecords = getMedicalRecords();
-      setRecords(allRecords.filter(r => r.patientId === session.id));
-    }
+    const init = async () => {
+      const session = await getSession();
+      setUser(session);
+      if (session) {
+        const allRecords = getMedicalRecords();
+        setRecords(allRecords.filter(r => r.patientId === session.id));
+      }
+    };
+    init();
   }, []);
 
   return (

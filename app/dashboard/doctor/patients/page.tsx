@@ -16,10 +16,13 @@ export default function DoctorPatients() {
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    const session = getSession();
-    setUser(session);
-    setAppointments(getAppointments());
-    setRecords(getMedicalRecords());
+    const init = async () => {
+      const session = await getSession();
+      setUser(session);
+      setAppointments(getAppointments());
+      setRecords(getMedicalRecords());
+    };
+    init();
   }, []);
 
   const refreshRecords = () => setRecords(getMedicalRecords());
