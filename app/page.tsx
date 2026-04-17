@@ -85,7 +85,7 @@ export default function Home() {
           <div className="relative group animate-in fade-in slide-in-from-left duration-1000">
             <div className="absolute inset-0 bg-primary/20 rounded-[3rem] blur-2xl group-hover:blur-3xl transition-all"></div>
             <Image
-              src="/dental_clinic_hero_1775230068067.png"
+              src="/window.svg"
               alt="عيادة أسنان عصرية"
               width={800}
               height={600}
@@ -243,7 +243,7 @@ export default function Home() {
             <div className="relative">
               <div className="absolute -inset-4 bg-secondary/20 rounded-[4rem] -rotate-3 blur-xl"></div>
               <Image
-                src="/dental_tools_professional_1775230165043.png"
+                src="/file.svg"
                 alt="تقنياتنا الحديثة"
                 width={700}
                 height={500}

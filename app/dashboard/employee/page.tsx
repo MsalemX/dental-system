@@ -18,7 +18,7 @@ export default function EmployeeDashboard() {
 
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [editingPatient, setEditingPatient] = useState<User | null>(null);
-  const [patientForm, setPatientForm] = useState({ name: '', email: '', phone: '', age: '', gender: 'ذكر' });
+  const [patientForm, setPatientForm] = useState({ name: '', email: '', phone: '', age: '', gender: 'ذكر', password: '' });
 
   const [isBillModalOpen, setIsBillModalOpen] = useState(false);
   const [billForm, setBillForm] = useState({ patientId: '', patientName: '', doctorName: '', serviceName: '', amount: 0, discount: 0, total: 0, status: 'unpaid' as 'unpaid' | 'paid', date: new Date().toISOString().split('T')[0] });
@@ -81,25 +81,34 @@ export default function EmployeeDashboard() {
 
   const openAddPatient = () => {
     setEditingPatient(null);
-    setPatientForm({ name: '', email: `patient${Date.now()}@juman.com`, phone: '', age: '', gender: 'ذكر' });
+    setPatientForm({ name: '', email: '', phone: '', age: '', gender: 'ذكر', password: '' });
     setIsPatientModalOpen(true);
   };
 
   const openEditPatient = (p: User) => {
     setEditingPatient(p);
-    setPatientForm({ name: p.name, email: p.email, phone: p.phone || '', age: p.age || '', gender: p.gender || 'ذكر' });
+    setPatientForm({ name: p.name, email: p.email, phone: p.phone || '', age: p.age || '', gender: p.gender || 'ذكر', password: '' });
     setIsPatientModalOpen(true);
   };
 
-  const handlePatientSubmit = (e: React.FormEvent) => {
+  const handlePatientSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingPatient) {
-      adminUpdateUser(editingPatient.id, { ...patientForm });
-    } else {
-      adminAddUser({ ...patientForm, role: 'patient' });
+    try {
+      if (editingPatient) {
+        await adminUpdateUser(editingPatient.id, { ...patientForm });
+      } else {
+        const created = await adminAddUser({ ...patientForm, role: 'patient' });
+        if (created.temporaryPassword) {
+          alert(`تم إنشاء حساب المريض بنجاح.\nالبريد: ${created.email}\nكلمة المرور المؤقتة: ${created.temporaryPassword}`);
+        } else {
+          alert(`تم إنشاء حساب المريض بنجاح.\nالبريد: ${created.email}`);
+        }
+      }
+      setIsPatientModalOpen(false);
+      await refresh();
+    } catch (err: any) {
+      alert(err.message || "تعذر حفظ بيانات المريض");
     }
-    setIsPatientModalOpen(false);
-    refresh();
   };
 
   const openAddBill = () => {
@@ -144,7 +153,7 @@ export default function EmployeeDashboard() {
           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/50">
             <h4 className="text-slate-400 font-bold text-sm mb-4">إجمالي التحصيل</h4>
             <div className="text-3xl font-extrabold text-emerald-500">
-              ${bills.filter(b => b.status === 'paid').reduce((acc, curr) => acc + curr.amount, 0)}
+              {bills.filter(b => b.status === 'paid').reduce((acc, curr) => acc + curr.amount, 0)} ر.ي
             </div>
             <p className="mt-2 text-xs font-bold text-slate-400">اليوم</p>
           </div>
@@ -219,7 +228,7 @@ export default function EmployeeDashboard() {
                   <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl shrink-0">💰</div>
                   <div>
                     <div className="font-extrabold text-slate-800">{bill.patientName}</div>
-                    <div className="text-xs text-rose-500 font-bold mb-1">المبلغ المطلوب: {bill.total} ر.س</div>
+                    <div className="text-xs text-rose-500 font-bold mb-1">المبلغ المطلوب: {bill.total} ر.ي</div>
                     <div className="text-[10px] text-slate-500 font-bold">{bill.serviceName} • الطبيب: {bill.doctorName}</div>
                   </div>
                 </div>
@@ -421,6 +430,31 @@ export default function EmployeeDashboard() {
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">رقم الجوال</label>
                 <input type="text" value={patientForm.phone} onChange={e => setPatientForm({...patientForm, phone: e.target.value})} className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary" required placeholder="05XXXXXXXX" />
               </div>
+              {!editingPatient && (
+                <>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">البريد الإلكتروني</label>
+                    <input
+                      type="email"
+                      value={patientForm.email}
+                      onChange={e => setPatientForm({ ...patientForm, email: e.target.value })}
+                      className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary"
+                      required
+                      placeholder="patient@example.com"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">كلمة المرور (اختياري)</label>
+                    <input
+                      type="password"
+                      value={patientForm.password}
+                      onChange={e => setPatientForm({ ...patientForm, password: e.target.value })}
+                      className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary"
+                      placeholder="اتركها فارغة لتوليد كلمة مرور مؤقتة"
+                    />
+                  </div>
+                </>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">العمر</label>
@@ -471,7 +505,7 @@ export default function EmployeeDashboard() {
                   setBillForm({ ...billForm, serviceName: e.target.value, amount: price, total: price - billForm.discount });
                 }} className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary appearance-none" required>
                   <option value="">اختر الخدمة (لجلب السعر التلقائي)</option>
-                  {services.map(s => <option key={s.id} value={s.name}>{s.name} - {s.price} ر.س</option>)}
+                  {services.map(s => <option key={s.id} value={s.name}>{s.name} - {s.price} ر.ي</option>)}
                 </select>
               </div>
               <div className="space-y-2">
@@ -497,7 +531,7 @@ export default function EmployeeDashboard() {
               </div>
               <div className={`flex items-center justify-between p-5 rounded-2xl ${billForm.total >= 0 ? 'bg-primary/5 border border-primary/10' : 'bg-rose-50 border border-rose-100'}`}>
                 <span className="font-black text-slate-600">القيمة الإجمالية</span>
-                <span className={`text-2xl font-black ${billForm.total >= 0 ? 'text-primary' : 'text-rose-500'}`}>{billForm.total} ر.س</span>
+                <span className={`text-2xl font-black ${billForm.total >= 0 ? 'text-primary' : 'text-rose-500'}`}>{billForm.total} ر.ي</span>
               </div>
               <div className="pt-4 flex gap-4">
                 <button type="submit" className="flex-1 bg-primary text-white font-black h-16 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-primary/30">

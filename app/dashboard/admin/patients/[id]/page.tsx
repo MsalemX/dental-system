@@ -16,6 +16,11 @@ export default function PatientProfile() {
   const [bills, setBills] = useState<Bill[]>([]);
   const [medicalFiles, setMedicalFiles] = useState<MedicalFile[]>([]);
   const [isFileModalOpen, setIsFileModalOpen] = useState(false);
+  const [fileType, setFileType] = useState<'xray' | 'document' | 'photo'>('xray');
+  const [photoVariant, setPhotoVariant] = useState<'before' | 'after'>('before');
+  const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(null);
+  const [uploadNotes, setUploadNotes] = useState('');
+  const [previewFile, setPreviewFile] = useState<MedicalFile | null>(null);
   const [activeTab, setActiveTab] = useState<'appointments' | 'finances' | 'chart' | 'files'>('appointments');
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -151,8 +156,8 @@ export default function PatientProfile() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
           { label: 'إجمالي الحجوزات', value: stats.appointmentsCount, sub: 'موعد', icon: '📅', color: 'text-primary', bg: 'bg-primary/5' },
-          { label: 'إجمالي المدفوعات', value: stats.totalPaid, sub: 'ر.س', icon: '💰', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'الديون المتبقية', value: stats.totalDebt, sub: 'ر.س', icon: '💳', color: 'text-rose-600', bg: 'bg-rose-50' },
+          { label: 'إجمالي المدفوعات', value: stats.totalPaid, sub: 'ر.ي', icon: '💰', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'الديون المتبقية', value: stats.totalDebt, sub: 'ر.ي', icon: '💳', color: 'text-rose-600', bg: 'bg-rose-50' },
         ].map((s, i) => (
           <div key={i} className={`p-8 rounded-[2.5rem] border border-slate-100 shadow-xl ${s.bg} flex items-center justify-between`}>
             <div>
@@ -217,7 +222,7 @@ export default function PatientProfile() {
                     </div>
                     <div className="w-24 text-center">
                       <span className={`text-[10px] font-black px-3 py-1.5 rounded-lg ${app.status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
-                          app.status === 'cancelled' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600'
+                        app.status === 'cancelled' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600'
                         }`}>
                         {app.status === 'completed' ? 'تم' : app.status === 'cancelled' ? 'ملغي' : 'مؤكد'}
                       </span>
@@ -250,7 +255,7 @@ export default function PatientProfile() {
                       </div>
                     </div>
                     <div className="text-center px-4">
-                      <div className="text-lg font-black text-slate-800">{bill.total} <span className="text-xs font-bold text-slate-400">ر.س</span></div>
+                      <div className="text-lg font-black text-slate-800">{bill.total} <span className="text-xs font-bold text-slate-400">ر.ي</span></div>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`text-[10px] font-black px-3 py-1.5 rounded-lg ${bill.status === 'paid' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
@@ -301,13 +306,13 @@ export default function PatientProfile() {
                       <div>
                         <div className="font-black text-slate-700">{file.filename}</div>
                         <div className="text-xs font-bold text-slate-400">
-                          {file.type === 'xray' ? 'أشعة' : file.type === 'document' ? 'وثيقة' : 'صورة'} • {file.uploadedAt}
+                          {file.type === 'xray' ? 'أشعة' : file.type === 'document' ? 'وثيقة' : 'صورة'}{file.photoVariant ? ` • ${file.photoVariant === 'before' ? 'قبل' : 'بعد'}` : ''} • {file.uploadedAt}
                         </div>
                         {file.notes && <div className="text-xs text-slate-500 mt-1">{file.notes}</div>}
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button className="bg-slate-100 text-slate-600 font-black px-4 py-2 rounded-xl text-sm hover:bg-slate-200 transition-colors">
+                      <button onClick={() => setPreviewFile(file)} className="bg-slate-100 text-slate-600 font-black px-4 py-2 rounded-xl text-sm hover:bg-slate-200 transition-colors">
                         عرض
                       </button>
                       <button
@@ -336,33 +341,85 @@ export default function PatientProfile() {
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsFileModalOpen(false)} />
           <div className="bg-white w-full max-w-lg rounded-[3rem] shadow-2xl relative z-10 p-10 animate-in zoom-in-95 duration-300">
             <h3 className="text-2xl font-black text-slate-800 mb-6">رفع ملف طبي جديد</h3>
-            <form onSubmit={(e) => {
+            <form onSubmit={async (e) => {
               e.preventDefault();
-              // Handle file upload here
-              alert('تم رفع الملف بنجاح (محاكاة)');
-              setIsFileModalOpen(false);
+              if (!selectedUploadFile) return;
+              const reader = new FileReader();
+              reader.onload = () => {
+                addMedicalFile({
+                  patientId,
+                  patientName: patient.name || '',
+                  doctorName: 'دكتور',
+                  type: fileType,
+                  photoVariant: fileType === 'photo' ? photoVariant : undefined,
+                  filename: selectedUploadFile.name,
+                  url: reader.result as string,
+                  uploadedAt: new Date().toISOString().split('T')[0],
+                  notes: uploadNotes || (fileType === 'photo' ? `${photoVariant === 'before' ? 'قبل' : 'بعد'}` : '')
+                });
+                setMedicalFiles(getMedicalFiles(patientId));
+                setIsFileModalOpen(false);
+                setSelectedUploadFile(null);
+                setUploadNotes('');
+                setFileType('xray');
+                setPhotoVariant('before');
+                alert('تم رفع الملف بنجاح');
+              };
+              reader.readAsDataURL(selectedUploadFile);
             }} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest">نوع الملف</label>
-                <select className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary" required>
+                <select value={fileType} onChange={e => setFileType(e.target.value as 'xray' | 'document' | 'photo')} className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary" required>
                   <option value="xray">أشعة (X-ray)</option>
                   <option value="document">وثيقة طبية</option>
-                  <option value="photo">صورة</option>
+                  <option value="photo">صورة قبل/بعد</option>
                 </select>
               </div>
+              {fileType === 'photo' && (
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">نوع الصورة</label>
+                  <select value={photoVariant} onChange={e => setPhotoVariant(e.target.value as 'before' | 'after')} className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary" required>
+                    <option value="before">قبل</option>
+                    <option value="after">بعد</option>
+                  </select>
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest">اختيار الملف</label>
-                <input type="file" accept="image/*,.pdf,.doc,.docx" className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-primary file:text-white hover:file:bg-primary/90" required />
+                <input type="file" accept="image/*,.pdf,.doc,.docx" onChange={e => setSelectedUploadFile(e.target.files?.[0] || null)} className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-primary file:text-white hover:file:bg-primary/90" required />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest">ملاحظات</label>
-                <textarea className="w-full h-24 bg-slate-50 border-0 rounded-2xl p-6 font-bold text-slate-700 resize-none" placeholder="أضف وصفاً للملف..." />
+                <textarea value={uploadNotes} onChange={e => setUploadNotes(e.target.value)} className="w-full h-24 bg-slate-50 border-0 rounded-2xl p-6 font-bold text-slate-700 resize-none" placeholder="أضف وصفاً للملف..." />
               </div>
               <div className="pt-6 flex gap-4">
                 <button type="submit" className="flex-1 h-16 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/30 hover:scale-[1.02] transition-all">رفع الملف</button>
-                <button type="button" onClick={() => setIsFileModalOpen(false)} className="px-8 bg-slate-100 text-slate-500 font-black h-16 rounded-2xl hover:bg-slate-200 transition-all">إلغاء</button>
+                <button type="button" onClick={() => { setIsFileModalOpen(false); setSelectedUploadFile(null); setUploadNotes(''); setFileType('xray'); setPhotoVariant('before'); }} className="px-8 bg-slate-100 text-slate-500 font-black h-16 rounded-2xl hover:bg-slate-200 transition-all">إلغاء</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {previewFile && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/80" onClick={() => setPreviewFile(null)} />
+          <div className="relative z-10 bg-white rounded-[3rem] overflow-hidden max-w-3xl w-full shadow-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+              <div>
+                <div className="text-lg font-black text-slate-800">{previewFile.filename}</div>
+                <div className="text-sm text-slate-500">{previewFile.photoVariant ? (previewFile.photoVariant === 'before' ? 'قبل' : 'بعد') : previewFile.type === 'xray' ? 'أشعة' : 'وثيقة'} • {previewFile.uploadedAt}</div>
+              </div>
+              <button onClick={() => setPreviewFile(null)} className="text-slate-500 hover:text-slate-900 font-black">إغلاق</button>
+            </div>
+            <div className="p-6">
+              {previewFile.type === 'document' ? (
+                <div className="text-center p-20 text-slate-500 font-bold">هذا الملف مستند ولا يمكن عرضه كنموذج صورة هنا.</div>
+              ) : (
+                <img src={previewFile.url} alt={previewFile.filename} className="w-full h-[450px] object-contain rounded-3xl bg-slate-100" />
+              )}
+              {previewFile.notes && <div className="mt-4 text-sm text-slate-500">{previewFile.notes}</div>}
+            </div>
           </div>
         </div>
       )}

@@ -108,7 +108,7 @@ export default function AdminBilling() {
       addNotification({
         type: 'system',
         title: '⚠️ مطالبة مالية',
-        message: `المريض الكريم ${debtForm.patientName}، تم تسجيل دين بقيمة ${debtForm.amount} ر.س مقابل (${debtForm.reason}). نرجو سدادها في أقرب وقت. - عيادة جُمان`
+        message: `المريض الكريم ${debtForm.patientName}، تم تسجيل دين بقيمة ${debtForm.amount} ر.ي مقابل (${debtForm.reason}). نرجو سدادها في أقرب وقت. - عيادة جُمان`
       });
     }
     refresh();
@@ -162,10 +162,10 @@ export default function AdminBilling() {
           <table className="w-full border-collapse text-sm mb-8">
             <thead><tr className="border-b-2 border-black"><th className="py-2 text-right font-black">الخدمة</th><th className="py-2 text-left font-black">المبلغ</th></tr></thead>
             <tbody>
-              <tr className="border-b border-slate-200"><td className="py-3">{printingBill.serviceName}</td><td className="py-3 text-left">{printingBill.amount} ر.س</td></tr>
-              {printingBill.discount > 0 && <tr className="border-b border-slate-200"><td className="py-3 text-emerald-700">خصم</td><td className="py-3 text-left text-emerald-700">- {printingBill.discount} ر.س</td></tr>}
+              <tr className="border-b border-slate-200"><td className="py-3">{printingBill.serviceName}</td><td className="py-3 text-left">{printingBill.amount} ر.ي</td></tr>
+              {printingBill.discount > 0 && <tr className="border-b border-slate-200"><td className="py-3 text-emerald-700">خصم</td><td className="py-3 text-left text-emerald-700">- {printingBill.discount} ر.ي</td></tr>}
             </tbody>
-            <tfoot><tr className="font-black text-lg"><td className="pt-4">الإجمالي</td><td className="pt-4 text-left">{printingBill.total} ر.س</td></tr></tfoot>
+            <tfoot><tr className="font-black text-lg"><td className="pt-4">الإجمالي</td><td className="pt-4 text-left">{printingBill.total} ر.ي</td></tr></tfoot>
           </table>
           <div className={`text-center font-black text-lg py-3 rounded-xl ${printingBill.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
             {printingBill.status === 'paid' ? '✅ مدفوعة' : '⏳ غير مدفوعة'}
@@ -201,7 +201,7 @@ export default function AdminBilling() {
             { label: 'إجمالي الفواتير', value: stats.total, sub: 'فاتورة', icon: '🧾', color: 'text-primary', bg: 'bg-primary/10' },
             { label: 'مدفوعة', value: stats.paid, sub: 'فاتورة', icon: '✅', color: 'text-emerald-600', bg: 'bg-emerald-50' },
             { label: 'غير مدفوعة', value: stats.unpaid, sub: 'فاتورة', icon: '⏳', color: 'text-rose-600', bg: 'bg-rose-50' },
-            { label: 'الإيرادات المحصلة', value: `${stats.revenue}`, sub: 'ر.س', icon: '💰', color: 'text-amber-600', bg: 'bg-amber-50' },
+            { label: 'الإيرادات المحصلة', value: `${stats.revenue}`, sub: 'ر.ي', icon: '💰', color: 'text-amber-600', bg: 'bg-amber-50' },
           ].map((s, i) => (
             <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-lg flex items-center gap-4">
               <div className={`w-12 h-12 ${s.bg} rounded-2xl flex items-center justify-center text-xl shrink-0`}>{s.icon}</div>
@@ -260,8 +260,8 @@ export default function AdminBilling() {
 
                   {/* Pricing */}
                   <div className="text-left w-32 shrink-0">
-                    <div className="text-lg font-black text-slate-800">{bill.total} <span className="text-xs font-bold text-slate-400">ر.س</span></div>
-                    {bill.discount > 0 && <div className="text-xs font-bold text-emerald-500">خصم {bill.discount} ر.س</div>}
+                    <div className="text-lg font-black text-slate-800">{bill.total} <span className="text-xs font-bold text-slate-400">ر.ي</span></div>
+                    {bill.discount > 0 && <div className="text-xs font-bold text-emerald-500">خصم {bill.discount} ر.ي</div>}
                   </div>
 
                   {/* Status */}
@@ -327,19 +327,19 @@ export default function AdminBilling() {
                   <select value={form.serviceName} onChange={e => handleServiceSelect(e.target.value)}
                     className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary appearance-none" required>
                     <option value="">اختر الخدمة</option>
-                    {services.map(s => <option key={s.id} value={s.name}>{s.name} — {s.price} ر.س</option>)}
+                    {services.map(s => <option key={s.id} value={s.name}>{s.name} — {s.price} ر.ي</option>)}
                   </select>
                 </div>
 
                 {/* Price & Discount */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">السعر (ر.س)</label>
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">السعر (ر.ي)</label>
                     <input type="number" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: Number(e.target.value) }))}
                       className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary" required />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">الخصم (ر.س)</label>
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">الخصم (ر.ي)</label>
                     <input type="number" value={form.discount} min={0} max={form.amount} onChange={e => setForm(f => ({ ...f, discount: Number(e.target.value) }))}
                       className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary" />
                   </div>
@@ -348,7 +348,7 @@ export default function AdminBilling() {
                 {/* Total Preview */}
                 <div className={`flex items-center justify-between p-5 rounded-2xl ${total >= 0 ? 'bg-primary/5 border border-primary/10' : 'bg-rose-50 border border-rose-100'}`}>
                   <span className="font-black text-slate-600">الإجمالي بعد الخصم</span>
-                  <span className={`text-2xl font-black ${total >= 0 ? 'text-primary' : 'text-rose-500'}`}>{total} ر.س</span>
+                  <span className={`text-2xl font-black ${total >= 0 ? 'text-primary' : 'text-rose-500'}`}>{total} ر.ي</span>
                 </div>
 
                 {/* Date */}
@@ -419,7 +419,7 @@ export default function AdminBilling() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-widest">قيمة الدين (ر.س)</label>
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest">قيمة الدين (ر.ي)</label>
                 <input type="number" required min={1} value={debtForm.amount || ''} onChange={e => setDebtForm({ ...debtForm, amount: Number(e.target.value) })} className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-black text-slate-700 focus:ring-2 focus:ring-rose-500 text-xl" />
               </div>
 

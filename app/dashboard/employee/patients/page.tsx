@@ -102,7 +102,7 @@ export default function EmployeePatients() {
                 <div className={`p-4 rounded-2xl col-span-2 flex justify-between items-center ${stats.unpaidSum > 0 ? 'bg-rose-50 border border-rose-100' : 'bg-emerald-50 border border-emerald-100'}`}>
                     <div>
                         <span className={`text-[10px] uppercase font-black block mb-1 ${stats.unpaidSum > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>الديون المستحقة</span>
-                        <span className={`font-black text-lg ${stats.unpaidSum > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{stats.unpaidSum} ر.س</span>
+                        <span className={`font-black text-lg ${stats.unpaidSum > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{stats.unpaidSum} ر.ي</span>
                     </div>
                     {stats.unpaidSum > 0 && <span className="text-rose-500 animate-pulse text-xs font-bold">يوجد متأخرات ⚠️</span>}
                 </div>

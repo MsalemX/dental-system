@@ -31,10 +31,13 @@ export default function AdminDashboard() {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await adminAddUser(formData);
+      const createdUser = await adminAddUser(formData);
       setIsAddModalOpen(false);
       setFormData({ name: '', email: '', phone: '', role: 'doctor', specialty: '', password: '' });
       await refreshUsers();
+      if ((createdUser as any).temporaryPassword) {
+        alert(`تم إنشاء الحساب بنجاح.\nكلمة المرور المؤقتة: ${(createdUser as any).temporaryPassword}`);
+      }
     } catch (err: any) {
       alert(err.message);
     }
@@ -110,7 +113,7 @@ export default function AdminDashboard() {
             <span className="text-rose-500 font-bold text-xs">-3%</span>
           </div>
           <h4 className="text-slate-400 font-bold text-xs uppercase tracking-widest">إيرادات الشهر</h4>
-          <div className="text-3xl font-black text-slate-800 mt-2">$24,500</div>
+          <div className="text-3xl font-black text-slate-800 mt-2">0 ر.ي</div>
         </div>
 
         <div className="bg-primary p-8 rounded-[3rem] shadow-xl shadow-primary/20 text-white relative overflow-hidden">

@@ -149,14 +149,14 @@ export default function EmployeePatientProfile() {
         <div className={`p-8 rounded-[2.5rem] border border-slate-100 shadow-xl bg-emerald-50 flex items-center justify-between`}>
           <div>
             <div className="text-[10px] font-black text-emerald-400 uppercase mb-1">المدفوعات الكلية</div>
-            <div className={`text-4xl font-black text-emerald-600`}>{stats.totalPaid} <span className="text-lg font-bold">ر.س</span></div>
+            <div className={`text-4xl font-black text-emerald-600`}>{stats.totalPaid} <span className="text-lg font-bold">ر.ي</span></div>
           </div>
           <div className="text-4xl opacity-40">💰</div>
         </div>
         <div className={`p-8 rounded-[2.5rem] border border-slate-100 shadow-xl bg-rose-50 flex items-center justify-between`}>
           <div>
             <div className="text-[10px] font-black text-rose-400 uppercase mb-1">الديون المستحقة</div>
-            <div className={`text-4xl font-black text-rose-600`}>{stats.totalDebt} <span className="text-lg font-bold">ر.س</span></div>
+            <div className={`text-4xl font-black text-rose-600`}>{stats.totalDebt} <span className="text-lg font-bold">ر.ي</span></div>
           </div>
           <div className="text-4xl opacity-40">💳</div>
         </div>
@@ -217,7 +217,7 @@ export default function EmployeePatientProfile() {
                   <tr key={bill.id} className="hover:bg-slate-50 transition-colors">
                     <td className="p-6 font-black text-slate-700">{bill.serviceName}</td>
                     <td className="p-6 font-bold text-slate-500">{bill.date}</td>
-                    <td className="p-6 font-black text-slate-800">{bill.total} ر.س</td>
+                    <td className="p-6 font-black text-slate-800">{bill.total} ر.ي</td>
                     <td className="p-6">
                         <span className={`text-[10px] font-black px-3 py-1.5 rounded-lg ${bill.status === 'paid' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
                             {bill.status === 'paid' ? 'مدفوعة' : 'غير مدفوعة'}

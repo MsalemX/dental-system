@@ -1,5 +1,6 @@
+import { supabase } from "./supabaseClient";
 
-export type UserRole = 'admin' | 'doctor' | 'employee' | 'patient';
+export type UserRole = "admin" | "doctor" | "employee" | "patient";
 
 export interface User {
   id: string;
@@ -9,195 +10,164 @@ export interface User {
   phone?: string;
   specialty?: string;
   bio?: string;
-  status?: 'active' | 'inactive';
+  status?: "active" | "inactive";
   age?: string;
   gender?: string;
 }
 
-export const DEMO_ACCOUNTS = [
-  { email: 'admin@juman.com', password: 'admin123', name: 'مدير النظام', role: 'admin' },
-  { email: 'doctor@juman.com', password: 'doctor123', name: 'د. سارة محمود', role: 'doctor' },
-  { email: 'emp@juman.com', password: 'emp123', name: 'موظف استقبال', role: 'employee' },
-  { email: 'user@juman.com', password: 'user123', name: 'مريض', role: 'patient' }
-];
-
-/**
- * Local-only Auth Helper
- */
-const getStoredUser = (): User | null => {
-  if (typeof window === 'undefined') return null;
-  const user = localStorage.getItem('juman_user');
-  return user ? JSON.parse(user) : null;
+type ProfileRow = {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  phone: string | null;
+  specialty: string | null;
+  bio: string | null;
+  status: "active" | "inactive" | null;
+  age: number | null;
+  gender: string | null;
 };
 
-const setStoredUser = (user: User | null) => {
-  if (typeof window === 'undefined') return;
-  if (user) {
-    localStorage.setItem('juman_user', JSON.stringify(user));
-  } else {
-    localStorage.removeItem('juman_user');
-  }
+const mapProfileToUser = (profile: ProfileRow): User => ({
+  id: profile.id,
+  name: profile.name,
+  email: profile.email,
+  role: profile.role,
+  phone: profile.phone ?? undefined,
+  specialty: profile.specialty ?? undefined,
+  bio: profile.bio ?? undefined,
+  status: profile.status ?? "active",
+  age: profile.age != null ? String(profile.age) : undefined,
+  gender: profile.gender ?? undefined,
+});
+
+const getProfileByEmail = async (email: string): Promise<User | null> => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id,email,name,role,phone,specialty,bio,status,age,gender")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapProfileToUser(data as ProfileRow);
 };
 
-/**
- * Gets the current session (Local)
- */
 export const getSession = async (): Promise<User | null> => {
-  return getStoredUser();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user?.email) return null;
+  return getProfileByEmail(data.user.email);
 };
 
-/**
- * Gets all users (Local - mostly demo accounts + any added later)
- */
 export const getAllUsers = async (): Promise<User[]> => {
-  if (typeof window === 'undefined') return [];
-  const extra = localStorage.getItem('juman_extra_users');
-  const extraUsers = extra ? JSON.parse(extra) : [];
-  
-  return [
-    ...DEMO_ACCOUNTS.map((d, i) => ({
-      id: `demo_${d.role}`,
-      name: d.name,
-      email: d.email,
-      role: d.role as UserRole,
-      status: 'active' as const
-    })),
-    ...extraUsers
-  ];
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id,email,name,role,phone,specialty,bio,status,age,gender")
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return [];
+  return (data as ProfileRow[]).map(mapProfileToUser);
 };
 
-/**
- * Get users by role
- */
 export const getUsersByRole = async (role: UserRole): Promise<User[]> => {
-  const all = await getAllUsers();
-  return all.filter(u => u.role === role);
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id,email,name,role,phone,specialty,bio,status,age,gender")
+    .eq("role", role)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return [];
+  return (data as ProfileRow[]).map(mapProfileToUser);
 };
 
-/**
- * Log in with email and password (Local)
- */
 export const login = async (email: string, pass: string): Promise<User | null> => {
-  const demo = DEMO_ACCOUNTS.find(d => d.email === email && d.password === pass);
-  if (demo) {
-    const user: User = {
-      id: `demo_${demo.role}`,
-      name: demo.name,
-      email: demo.email,
-      role: demo.role as UserRole,
-      status: 'active'
-    };
-    setStoredUser(user);
-    return user;
-  }
-  return null;
-};
-
-/**
- * Register a new user (Local)
- */
-export const register = async (email: string, pass: string, name: string, phone: string, role: UserRole = 'patient'): Promise<User | null> => {
-  const user: User = {
-    id: `u_${Date.now()}`,
-    name,
+  const { error } = await supabase.auth.signInWithPassword({
     email,
-    role,
-    phone,
-    status: 'active'
-  };
-  
-  // Store in extra users
-  const all = await getAllUsers();
-  const extra = all.filter(u => !u.id.startsWith('demo_'));
-  localStorage.setItem('juman_extra_users', JSON.stringify([...extra, user]));
-  
-  setStoredUser(user);
-  return user;
+    password: pass,
+  });
+
+  if (error) return null;
+
+  const sessionUser = await getSession();
+  if (!sessionUser) return null;
+
+  return sessionUser;
 };
 
-/**
- * Change current user password (Mock)
- */
-export const changePassword = async (newPassword: string): Promise<{ success: boolean; error?: string }> => {
-  return { success: true };
+export const register = async (): Promise<User | null> => {
+  throw new Error("Self registration is disabled. Admin should create accounts.");
 };
 
-/**
- * Update user profile (Local)
- */
+export const changePassword = async (
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> => {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  return error ? { success: false, error: error.message } : { success: true };
+};
+
 export const updateUser = async (id: string, data: Partial<User>) => {
-  const currentUser = getStoredUser();
-  if (currentUser && currentUser.id === id) {
-    const updated = { ...currentUser, ...data };
-    setStoredUser(updated);
-  }
-  
-  // Update in extra users if exists
-  const extra = localStorage.getItem('juman_extra_users');
-  if (extra) {
-    const users = JSON.parse(extra);
-    const updated = users.map((u: any) => u.id === id ? { ...u, ...data } : u);
-    localStorage.setItem('juman_extra_users', JSON.stringify(updated));
-  }
-};
-
-/**
- * Admin: Add a new user (Local)
- */
-export const adminAddUser = async (data: { 
-  name: string; 
-  email: string; 
-  role: UserRole; 
-  phone: string; 
-  specialty?: string; 
-  password?: string;
-}) => {
-  const newUser: User = {
-    id: `u_${Date.now()}`,
+  const payload = {
     name: data.name,
-    email: data.email,
-    role: data.role,
     phone: data.phone,
     specialty: data.specialty,
-    status: 'active'
+    bio: data.bio,
+    status: data.status,
+    age: data.age ? Number(data.age) : undefined,
+    gender: data.gender,
   };
-  
-  const extraStr = localStorage.getItem('juman_extra_users');
-  const extra = extraStr ? JSON.parse(extraStr) : [];
-  localStorage.setItem('juman_extra_users', JSON.stringify([...extra, newUser]));
-  
-  return newUser;
+
+  const { error } = await supabase.from("profiles").update(payload).eq("id", id);
+  if (error) throw new Error(error.message);
 };
 
-/**
- * Log out (Local)
- */
+export const adminAddUser = async (data: {
+  name: string;
+  email: string;
+  role: UserRole;
+  phone: string;
+  specialty?: string;
+  password?: string;
+  age?: string;
+  gender?: string;
+}) => {
+  const response = await fetch("/api/admin/users", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload?.error || "Failed to create user");
+  }
+
+  return payload as User & { temporaryPassword?: string | null };
+};
+
 export const logout = async () => {
-  setStoredUser(null);
+  await supabase.auth.signOut();
 };
 
-/**
- * Admin: Delete a user (Local)
- */
 export const deleteUser = async (id: string) => {
-  const extraStr = localStorage.getItem('juman_extra_users');
-  if (extraStr) {
-    const extra = JSON.parse(extraStr);
-    const filtered = extra.filter((u: any) => u.id !== id);
-    localStorage.setItem('juman_extra_users', JSON.stringify(filtered));
-  }
+  const { error } = await supabase.from("profiles").delete().eq("id", id);
+  if (error) throw new Error(error.message);
 };
 
-/**
- * Admin: Toggle user status (Local)
- */
 export const toggleUserStatus = async (id: string) => {
-  const extraStr = localStorage.getItem('juman_extra_users');
-  if (extraStr) {
-    const extra = JSON.parse(extraStr);
-    const updated = extra.map((u: any) => u.id === id ? { ...u, status: u.status === 'inactive' ? 'active' : 'inactive' } : u);
-    localStorage.setItem('juman_extra_users', JSON.stringify(updated));
-  }
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("status")
+    .eq("id", id)
+    .single();
+  if (error || !data) throw new Error(error?.message || "User not found");
+
+  const nextStatus = data.status === "inactive" ? "active" : "inactive";
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ status: nextStatus })
+    .eq("id", id);
+  if (updateError) throw new Error(updateError.message);
 };
 
 export const updateUserProfile = updateUser;

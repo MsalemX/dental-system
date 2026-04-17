@@ -27,11 +27,7 @@ const EXPENSE_CATEGORIES: ExpenseCategory[] = [
 
 export { EXPENSE_CATEGORIES };
 
-const INITIAL_EXPENSES: Expense[] = [
-  { id: 'exp_1', category: 'إيجار', amount: 5000, date: '2026-04-01', notes: 'إيجار شهر أبريل' },
-  { id: 'exp_2', category: 'أدوات ومستلزمات', amount: 1200, date: '2026-04-05', notes: 'شراء قفازات وأدوات تعقيم' },
-  { id: 'exp_3', category: 'رواتب', amount: 8000, date: '2026-04-10', notes: 'رواتب كادر الاستقبال' },
-];
+const INITIAL_EXPENSES: Expense[] = [];
 
 export const getExpenses = (): Expense[] => {
   if (typeof window === 'undefined') return INITIAL_EXPENSES;

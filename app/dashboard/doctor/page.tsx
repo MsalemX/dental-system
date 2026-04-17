@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAppointments, updateAppointmentStatus, getBills, addBill, Appointment, Bill } from "../../lib/data";
+import { getAppointments, updateAppointmentStatus, getBills, addBill, getMedicalFiles, addMedicalFile, Appointment, Bill } from "../../lib/data";
 import { getSession, updateUserProfile, getAllUsers, getUsersByRole, User } from "../../lib/auth";
 import { addNotification } from "../../lib/notifications";
 
@@ -11,13 +11,14 @@ export default function DoctorDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({ name: "", specialty: "", phone: "", bio: "" });
-  
-  const [dateFilter, setDateFilter] = useState<'today'|'week'|'month'>('today');
+
+  const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'month'>('today');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  
+
   // File Upload State
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [uploadType, setUploadType] = useState('xray');
+  const [uploadVariant, setUploadVariant] = useState<'before' | 'after'>('before');
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadPatient, setUploadPatient] = useState('');
@@ -34,18 +35,17 @@ export default function DoctorDashboard() {
       setBills(getBills());
       setUser(session);
       if (session) {
-        setEditData({ 
-          name: session.name || "", 
-          specialty: session.specialty || "", 
-          phone: session.phone || "", 
-          bio: session.bio || "" 
+        setEditData({
+          name: session.name || "",
+          specialty: session.specialty || "",
+          phone: session.phone || "",
+          bio: session.bio || ""
         });
       }
 
       const allPatients = await getUsersByRole('patient');
       setPatients(allPatients);
-      const stored = localStorage.getItem('juman_medical_files');
-      setSavedFiles(stored ? JSON.parse(stored) : []);
+      setSavedFiles(getMedicalFiles());
     };
     init();
   }, []);
@@ -62,7 +62,7 @@ export default function DoctorDashboard() {
 
   const handleDebtSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if(!user || !debtForm.patientId) return;
+    if (!user || !debtForm.patientId) return;
 
     addBill({
       patientId: debtForm.patientId,
@@ -81,7 +81,7 @@ export default function DoctorDashboard() {
       addNotification({
         type: 'system',
         title: '⚠️ مطالبة مالية',
-        message: `المريض الكريم ${debtForm.patientName}، تم تسجيل دين بقيمة ${debtForm.amount} ر.س مقابل (${debtForm.reason}). نرجو سدادها. - د. ${user.name}`
+        message: `المريض الكريم ${debtForm.patientName}، تم تسجيل دين بقيمة ${debtForm.amount} ر.ي مقابل (${debtForm.reason}). نرجو سدادها. - د. ${user.name}`
       });
     }
 
@@ -103,7 +103,7 @@ export default function DoctorDashboard() {
   // 2. Filter by Date
   const todayStr = new Date().toISOString().split('T')[0];
   const thisMonthStr = todayStr.slice(0, 7);
-  
+
   const filteredAppointments = myAppointments.filter(app => {
     // Date filter
     let dateMatch = true;
@@ -152,13 +152,13 @@ export default function DoctorDashboard() {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8 animate-in fade-in duration-500 pb-20">
-      
+
       <div className="lg:col-span-2 space-y-8">
-        
+
         {/* Profile Card */}
         <div className="bg-white p-6 md:p-10 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-full bg-primary/5 -skew-x-12 translate-x-1/2"></div>
-          
+
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex items-center gap-6">
               <div className="w-20 h-20 md:w-24 md:h-24 bg-primary/10 rounded-3xl flex items-center justify-center text-primary text-4xl font-black">
@@ -173,7 +173,7 @@ export default function DoctorDashboard() {
                 </div>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setIsEditing(!isEditing)}
               className="bg-slate-50 text-slate-600 px-6 py-3 rounded-2xl font-bold text-sm hover:bg-primary hover:text-white transition-all shadow-sm"
             >
@@ -185,19 +185,19 @@ export default function DoctorDashboard() {
             <form onSubmit={handleUpdateProfile} className="mt-8 grid md:grid-cols-2 gap-4 animate-in slide-in-from-top-4 duration-300 bg-slate-50 p-6 rounded-[2rem]">
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-400 uppercase">الاسم الكامل</label>
-                <input type="text" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} className="w-full p-4 bg-white rounded-2xl border-none outline-none font-bold" />
+                <input type="text" value={editData.name} onChange={e => setEditData({ ...editData, name: e.target.value })} className="w-full p-4 bg-white rounded-2xl border-none outline-none font-bold" />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-400 uppercase">التخصص الطبي</label>
-                <input type="text" value={editData.specialty} onChange={e => setEditData({...editData, specialty: e.target.value})} className="w-full p-4 bg-white rounded-2xl border-none outline-none font-bold" />
+                <input type="text" value={editData.specialty} onChange={e => setEditData({ ...editData, specialty: e.target.value })} className="w-full p-4 bg-white rounded-2xl border-none outline-none font-bold" />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-400 uppercase">رقم الجوال</label>
-                <input type="text" value={editData.phone} onChange={e => setEditData({...editData, phone: e.target.value})} className="w-full p-4 bg-white rounded-2xl border-none outline-none font-bold" />
+                <input type="text" value={editData.phone} onChange={e => setEditData({ ...editData, phone: e.target.value })} className="w-full p-4 bg-white rounded-2xl border-none outline-none font-bold" />
               </div>
               <div className="space-y-2 md:col-span-2">
                 <label className="text-xs font-black text-slate-400 uppercase">نبذة مهنية</label>
-                <textarea value={editData.bio} onChange={e => setEditData({...editData, bio: e.target.value})} className="w-full p-4 bg-white rounded-2xl border-none outline-none font-bold min-h-[100px]" />
+                <textarea value={editData.bio} onChange={e => setEditData({ ...editData, bio: e.target.value })} className="w-full p-4 bg-white rounded-2xl border-none outline-none font-bold min-h-[100px]" />
               </div>
               <button type="submit" className="md:col-span-2 bg-primary text-white py-4 rounded-2xl font-bold shadow-lg shadow-primary/20">حفظ التغييرات</button>
             </form>
@@ -231,9 +231,9 @@ export default function DoctorDashboard() {
                 </button>
               ))}
             </div>
-            
-            <select 
-              value={statusFilter} 
+
+            <select
+              value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
               className="px-4 py-3 bg-white rounded-xl font-bold text-sm text-slate-600 shadow-sm border-none outline-none focus:ring-2 focus:ring-primary/20"
             >
@@ -247,7 +247,7 @@ export default function DoctorDashboard() {
               <option value="no-show">غائب (No Show)</option>
             </select>
           </div>
-          
+
           {/* List */}
           <div className="space-y-4">
             {filteredAppointments.length > 0 ? filteredAppointments.map((app) => (
@@ -261,7 +261,7 @@ export default function DoctorDashboard() {
                     <div className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">{app.type} • {app.date}</div>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col sm:items-end gap-3 w-full sm:w-auto mt-4 sm:mt-0">
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-black text-slate-700 bg-slate-100 px-3 py-1 rounded-lg">{app.time}</span>
@@ -269,10 +269,10 @@ export default function DoctorDashboard() {
                       {STATUS_AR[app.status as keyof typeof STATUS_AR] || app.status}
                     </span>
                   </div>
-                  
+
                   {/* Status Actions Dropdown replacement with buttons or select */}
                   <div className="flex items-center gap-2">
-                    <select 
+                    <select
                       value={app.status}
                       onChange={(e) => handleStatusChange(app.id, e.target.value)}
                       className="bg-slate-50 text-slate-600 px-4 py-2 rounded-xl text-xs font-bold border-none outline-none hover:bg-slate-100 cursor-pointer"
@@ -322,27 +322,27 @@ export default function DoctorDashboard() {
             <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center justify-between">
               <div>
                 <div className="text-xs font-black text-emerald-600/70 mb-1">إجمالي الأرباح المستحقة</div>
-                <div className="text-2xl font-black text-emerald-600">{(myPaidBills.reduce((acc, curr) => acc + curr.total, 0) * 0.4).toFixed(2)} ر.س</div>
+                <div className="text-2xl font-black text-emerald-600">{(myPaidBills.reduce((acc, curr) => acc + curr.total, 0) * 0.4).toFixed(2)} ر.ي</div>
               </div>
               <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-xl">💰</div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <div className="text-[10px] font-black text-slate-400 mb-1">إجمالي الحالات المعالجة</div>
-                  <div className="text-xl font-black text-slate-700">{myAppointments.filter(a => a.status === 'completed').length} مريض</div>
-               </div>
-               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <div className="text-[10px] font-black text-slate-400 mb-1">نسبة العمولة</div>
-                  <div className="text-xl font-black text-primary">40%</div>
-               </div>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="text-[10px] font-black text-slate-400 mb-1">إجمالي الحالات المعالجة</div>
+                <div className="text-xl font-black text-slate-700">{myAppointments.filter(a => a.status === 'completed').length} مريض</div>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="text-[10px] font-black text-slate-400 mb-1">نسبة العمولة</div>
+                <div className="text-xl font-black text-primary">40%</div>
+              </div>
             </div>
 
             <div className="mt-4 border-t border-slate-100 pt-4">
-              <button 
-                onClick={() => setIsDebtModalOpen(true)} 
+              <button
+                onClick={() => setIsDebtModalOpen(true)}
                 className="w-full bg-rose-50 text-rose-600 font-bold py-3 rounded-xl hover:bg-rose-100 transition-all flex items-center justify-center gap-2"
               >
-                💳 تسجيل مديونية على مريض 
+                💳 تسجيل مديونية على مريض
               </button>
             </div>
           </div>
@@ -366,6 +366,32 @@ export default function DoctorDashboard() {
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/50">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 className="text-lg font-extrabold text-slate-800">صور قبل/بعد المريض</h3>
+            <p className="text-sm text-slate-500">يمكنك الاطلاع على الصور التي حفظتها للمرضى والرجوع إليها في أي وقت.</p>
+          </div>
+          <span className="text-sm font-black text-slate-400">{savedFiles.filter((f: any) => f.type === 'photo' && f.doctorName === user?.name).length} ملف</span>
+        </div>
+        {savedFiles.filter((f: any) => f.type === 'photo' && f.doctorName === user?.name).length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {savedFiles.filter((f: any) => f.type === 'photo' && f.doctorName === user?.name).map((file: any) => (
+              <div key={file.id} className="border border-slate-100 rounded-3xl overflow-hidden">
+                <img src={file.url} alt={file.filename} className="w-full h-52 object-cover" />
+                <div className="p-4">
+                  <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-2">{file.photoVariant === 'before' ? 'قبل' : 'بعد'} • {file.patientName}</div>
+                  <div className="font-black text-slate-800">{file.filename}</div>
+                  <div className="text-xs text-slate-400 mt-2">{file.uploadedAt}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center p-16 text-slate-400 font-bold">لم تقم برفع صور قبل/بعد حتى الآن.</div>
+        )}
       </div>
 
       {/* Upload Modal */}
@@ -394,21 +420,23 @@ export default function DoctorDashboard() {
               <form onSubmit={e => {
                 e.preventDefault();
                 if (!uploadFile || !uploadPatient) return;
+                const selectedPatient = patients.find(p => p.id === uploadPatient);
+                if (!selectedPatient) return;
                 const reader = new FileReader();
                 reader.onload = ev => {
-                  const newFile = {
-                    id: `file_${Date.now()}`,
-                    patientName: uploadPatient,
-                    type: uploadType,
-                    name: uploadFile.name,
-                    data: ev.target?.result as string,
-                    date: new Date().toISOString().split('T')[0],
-                    doctorName: user?.name || ''
-                  };
-                  const existing = JSON.parse(localStorage.getItem('juman_medical_files') || '[]');
-                  const updated = [newFile, ...existing];
-                  localStorage.setItem('juman_medical_files', JSON.stringify(updated));
-                  setSavedFiles(updated);
+                  const fileType = uploadType === 'reports' ? 'document' : uploadType;
+                  addMedicalFile({
+                    patientId: selectedPatient.id,
+                    patientName: selectedPatient.name,
+                    doctorName: user?.name || '',
+                    type: fileType as 'xray' | 'document' | 'photo',
+                    photoVariant: fileType === 'photo' ? uploadVariant : undefined,
+                    filename: uploadFile.name,
+                    url: ev.target?.result as string,
+                    uploadedAt: new Date().toISOString().split('T')[0],
+                    notes: uploadType === 'photos' ? `صورة ${uploadVariant}` : uploadType === 'xray' ? 'أشعة' : 'تقرير طبي'
+                  });
+                  setSavedFiles(getMedicalFiles());
                   setUploadSuccess(true);
                 };
                 reader.readAsDataURL(uploadFile);
@@ -417,12 +445,22 @@ export default function DoctorDashboard() {
                   <label className="text-xs font-black text-slate-400 uppercase">اختر المريض (لربط الملف)</label>
                   <select required value={uploadPatient} onChange={e => setUploadPatient(e.target.value)} className="w-full h-14 bg-slate-50 mt-2 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary appearance-none">
                     <option value="">اختر من قائمة مرضاك</option>
-                    {[...new Set(myAppointments.map(a => a.patientName))].map((name, i) => (
-                      <option key={i} value={name}>{name}</option>
+                    {patients.map(patient => (
+                      <option key={patient.id} value={patient.id}>{patient.name}</option>
                     ))}
                   </select>
                 </div>
-                
+
+                {uploadType === 'photos' && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase">المرحلة</label>
+                    <select value={uploadVariant} onChange={e => setUploadVariant(e.target.value as 'before' | 'after')} className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary appearance-none">
+                      <option value="before">قبل</option>
+                      <option value="after">بعد</option>
+                    </select>
+                  </div>
+                )}
+
                 <div className="relative group cursor-pointer">
                   <input type="file" required onChange={e => setUploadFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                   <div className={`border-2 border-dashed rounded-3xl p-8 text-center transition-all ${uploadFile ? 'border-primary bg-primary/5' : 'border-slate-200 bg-slate-50 group-hover:border-primary/50 group-hover:bg-primary/5'}`}>
@@ -437,7 +475,7 @@ export default function DoctorDashboard() {
                   <button type="submit" className="flex-1 h-14 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/30 hover:scale-[1.02] transition-all">
                     تأكيد الرفع
                   </button>
-                  <button type="button" onClick={() => { setIsUploadModalOpen(false); setUploadFile(null); setUploadPatient(''); }} className="px-6 h-14 bg-slate-100 text-slate-500 font-black rounded-2xl hover:bg-slate-200 transition-all">
+                  <button type="button" onClick={() => { setIsUploadModalOpen(false); setUploadFile(null); setUploadPatient(''); setUploadVariant('before'); }} className="px-6 h-14 bg-slate-100 text-slate-500 font-black rounded-2xl hover:bg-slate-200 transition-all">
                     إلغاء
                   </button>
                 </div>
@@ -465,9 +503,9 @@ export default function DoctorDashboard() {
                   {patients.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
               </div>
-              
+
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">قيمة الدين (ر.س)</label>
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">قيمة الدين (ر.ي)</label>
                 <input type="number" required value={debtForm.amount || ''} onChange={e => setDebtForm({ ...debtForm, amount: Number(e.target.value) })} className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-black text-slate-700 focus:ring-2 focus:ring-rose-500 text-xl" />
               </div>
 
@@ -475,7 +513,7 @@ export default function DoctorDashboard() {
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">السبب / الوصف</label>
                 <input type="text" required value={debtForm.reason} onChange={e => setDebtForm({ ...debtForm, reason: e.target.value })} className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-rose-500" placeholder="مثال: رسوم فحص إضافية، متأخرات..." />
               </div>
-              
+
               <label className="flex items-center gap-3 p-4 bg-rose-50 rounded-2xl border border-rose-100 cursor-pointer">
                 <input type="checkbox" checked={debtForm.notify} onChange={e => setDebtForm({ ...debtForm, notify: e.target.checked })} className="w-5 h-5 text-rose-500 rounded focus:ring-rose-500 border-rose-200" />
                 <span className="font-bold text-rose-700 text-sm">إرسال تفاصيل المديونية والمطالبة كرسالة للمريض</span>

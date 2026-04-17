@@ -51,10 +51,10 @@ export default function EmployeeDailyReports() {
       {/* Main Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { label: 'إيرادات اليوم المحصلة', value: stats.revenue, sub: 'ر.س', icon: '💰', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'إيرادات اليوم المحصلة', value: stats.revenue, sub: 'ر.ي', icon: '💰', color: 'text-emerald-600', bg: 'bg-emerald-50' },
           { label: 'إجمالي مواعيد اليوم', value: stats.appointmentsCount, sub: 'موعد', icon: '📅', color: 'text-primary', bg: 'bg-primary/5' },
           { label: 'مواعيد مكتملة', value: stats.completedApps, sub: 'موعد', icon: '✅', color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'مبالغ بانتظار التحصيل', value: stats.unpaidAmount, sub: 'ر.س', icon: '⏳', color: 'text-rose-600', bg: 'bg-rose-50' },
+          { label: 'مبالغ بانتظار التحصيل', value: stats.unpaidAmount, sub: 'ر.ي', icon: '⏳', color: 'text-rose-600', bg: 'bg-rose-50' },
         ].map((s, i) => (
           <div key={i} className={`p-8 rounded-[2.5rem] border border-slate-100 shadow-xl ${s.bg} flex flex-col justify-between`}>
              <div className="text-4xl mb-4">{s.icon}</div>
@@ -114,7 +114,7 @@ export default function EmployeeDailyReports() {
                             </div>
                             <div className="text-right">
                                 <div className={`font-black ${bill.status === 'paid' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                    {bill.total.toLocaleString()} ر.س
+                                    {bill.total.toLocaleString()} ر.ي
                                 </div>
                                 <div className="text-[10px] font-bold text-slate-300 uppercase">{bill.status === 'paid' ? 'تم التحصيل' : 'لم يتم الدفع'}</div>
                             </div>

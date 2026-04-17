@@ -121,11 +121,11 @@ export default function AdminPatients() {
                 </div>
                 <div className="bg-emerald-50 p-4 rounded-2xl">
                     <span className="text-[10px] uppercase font-black text-emerald-400 block mb-1">المدفوعات</span>
-                    <span className="font-black text-emerald-600">{stats.totalPaid} ر.س</span>
+                    <span className="font-black text-emerald-600">{stats.totalPaid} ر.ي</span>
                 </div>
                 <div className="bg-rose-50 p-4 rounded-2xl">
                     <span className="text-[10px] uppercase font-black text-rose-400 block mb-1">الديون</span>
-                    <span className="font-black text-rose-600">{stats.totalDebt} ر.س</span>
+                    <span className="font-black text-rose-600">{stats.totalDebt} ر.ي</span>
                 </div>
               </div>
             </div>

@@ -9,16 +9,7 @@ export interface Notification {
   read: boolean;
 }
 
-const INITIAL_NOTIFICATIONS: Notification[] = [
-  {
-    id: 'notif_1',
-    type: 'appointment_new',
-    title: 'موعد جديد',
-    message: 'تم حجز موعد جديد لـ فهد المريض مع د. سارة محمود في 2026-04-15',
-    createdAt: new Date().toISOString(),
-    read: false,
-  },
-];
+const INITIAL_NOTIFICATIONS: Notification[] = [];
 
 export const getNotifications = (): Notification[] => {
   if (typeof window === 'undefined') return INITIAL_NOTIFICATIONS;

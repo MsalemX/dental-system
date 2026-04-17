@@ -261,12 +261,12 @@ export default function PatientDashboard() {
             <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-[2rem] flex flex-col items-center justify-center text-center">
               <span className="text-emerald-500 text-3xl mb-2">✅</span>
               <span className="text-sm font-bold text-slate-500 mb-1">إجمالي المدفوع</span>
-              <span className="text-2xl font-black text-emerald-600">{totalPaid} ر.س</span>
+              <span className="text-2xl font-black text-emerald-600">{totalPaid} ر.ي</span>
             </div>
             <div className="bg-rose-50 border border-rose-100 p-6 rounded-[2rem] flex flex-col items-center justify-center text-center">
               <span className="text-rose-500 text-3xl mb-2">⏳</span>
               <span className="text-sm font-bold text-slate-500 mb-1">المتبقي (غير مدفوع)</span>
-              <span className="text-2xl font-black text-rose-600">{totalUnpaid} ر.س</span>
+              <span className="text-2xl font-black text-rose-600">{totalUnpaid} ر.ي</span>
             </div>
           </div>
 
@@ -284,7 +284,7 @@ export default function PatientDashboard() {
                 </div>
                 
                 <div className="flex items-center justify-between md:flex-col md:items-end gap-2">
-                  <div className="text-xl font-black text-slate-700">{Number(bill.total) || Number(bill.amount) || 0} ر.س</div>
+                  <div className="text-xl font-black text-slate-700">{Number(bill.total) || Number(bill.amount) || 0} ر.ي</div>
                   <div className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${
                     bill.status === 'paid' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-200 text-rose-700'
                   }`}>

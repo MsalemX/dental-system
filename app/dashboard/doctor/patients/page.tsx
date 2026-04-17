@@ -230,7 +230,7 @@ export default function DoctorPatients() {
                       </div>
                       
                       <div className="md:col-span-3 space-y-1">
-                        <label className="text-[10px] font-black text-slate-400 uppercase">السعر (ر.س)</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase">السعر (ر.ي)</label>
                         <input type="number" required min="0" value={proc.price === 0 ? '' : proc.price} onChange={(e) => updateProcedureField(idx, 'price', Number(e.target.value))} className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-primary" />
                       </div>
 
@@ -242,7 +242,7 @@ export default function DoctorPatients() {
                   ))}
                   {formData.procedures.length > 0 && (
                     <div className="flex justify-start pt-2">
-                       <span className="text-xs font-bold text-slate-400">إجمالي الفاتورة المتوقعة: <span className="text-primary font-black ml-1 block mt-1">{formData.procedures.reduce((acc, curr) => acc + (curr.price || 0), 0)} ر.س</span></span>
+                       <span className="text-xs font-bold text-slate-400">إجمالي الفاتورة المتوقعة: <span className="text-primary font-black ml-1 block mt-1">{formData.procedures.reduce((acc, curr) => acc + (curr.price || 0), 0)} ر.ي</span></span>
                     </div>
                   )}
                 </div>
@@ -298,7 +298,7 @@ export default function DoctorPatients() {
                                     <div className="font-bold text-sm text-slate-700">{p.service}</div>
                                     {p.notes && <div className="text-[10px] text-slate-400 font-bold">{p.notes}</div>}
                                   </div>
-                                  <div className="font-black text-primary text-xs shrink-0">{p.price} ر.س</div>
+                                  <div className="font-black text-primary text-xs shrink-0">{p.price} ر.ي</div>
                                 </div>
                               ))}
                             </div>

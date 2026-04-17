@@ -91,7 +91,7 @@ export default function ServicesManagement() {
               </div>
               <div className="text-left">
                 <span className="text-2xl font-black text-primary">{service.price}</span>
-                <span className="text-xs font-bold text-slate-400 mr-1">ر.س</span>
+                <span className="text-xs font-bold text-slate-400 mr-1">ر.ي</span>
               </div>
             </div>
 
@@ -150,7 +150,7 @@ export default function ServicesManagement() {
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">السعر (ر.س)</label>
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">السعر (ر.ي)</label>
                   <input 
                     required
                     type="number" 

@@ -1,37 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { register } from "../lib/auth";
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    try {
-      const user = await register(email, password, name, phone);
-
-      if (user) {
-        router.push(`/dashboard/${user.role}`);
-      } else {
-        setError("فشل إنشاء الحساب - البريد الإلكتروني قد يكون مسجلاً مسبقاً أو كلمة المرور ضعيفة");
-        setLoading(false);
-      }
-    } catch (err) {
-      setError("حدث خطأ غير متوقع أثناء التسجيل");
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
@@ -47,69 +19,18 @@ export default function RegisterPage() {
           <p className="text-slate-500">انضم لعائلة جُمان واحصل على أفضل رعاية</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-xs font-black text-slate-500 block pr-1 uppercase tracking-widest">الاسم الكامل</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 focus:border-primary outline-none transition-all text-slate-800"
-              placeholder="مثال: فهد القحطاني"
-            />
+        <div className="space-y-4">
+          <div className="bg-amber-50 border border-amber-200 text-amber-700 p-5 rounded-2xl text-sm font-bold">
+            التسجيل الذاتي موقوف حالياً. إنشاء الحسابات يتم عن طريق الأدمن فقط.
           </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-black text-slate-500 block pr-1 uppercase tracking-widest">البريد الإلكتروني</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 focus:border-primary outline-none transition-all text-slate-800"
-              placeholder="name@example.com"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-black text-slate-500 block pr-1 uppercase tracking-widest">رقم الجوال</label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-              className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 focus:border-primary outline-none transition-all text-slate-800"
-              placeholder="05xxxxxxx"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-black text-slate-500 block pr-1 uppercase tracking-widest">كلمة المرور</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 focus:border-primary outline-none transition-all text-slate-800"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {error && (
-            <div className="bg-rose-50 text-rose-500 p-4 rounded-2xl text-sm font-bold border border-rose-100 italic capitalize">
-              {error}
-            </div>
-          )}
-
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-primary text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+            type="button"
+            onClick={() => router.push("/login")}
+            className="w-full bg-primary text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all"
           >
-            {loading ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : "تأكيد وإنشاء الحساب"}
+            الرجوع إلى تسجيل الدخول
           </button>
-        </form>
+        </div>
 
         <div className="text-center pt-2">
           <p className="text-slate-500 text-sm">

@@ -161,15 +161,15 @@ export default function AdminReports() {
           {/* Totals */}
           <div className="grid grid-cols-3 gap-6">
             <div className="bg-white p-8 rounded-[3rem] border border-emerald-100 shadow-xl">
-              <div className="text-2xl font-black text-emerald-600">{finTotals.income.toLocaleString()} ر.س</div>
+              <div className="text-2xl font-black text-emerald-600">{finTotals.income.toLocaleString()} ر.ي</div>
               <div className="text-xs font-black text-slate-400 mt-1">إجمالي الإيرادات</div>
             </div>
             <div className="bg-white p-8 rounded-[3rem] border border-rose-100 shadow-xl">
-              <div className="text-2xl font-black text-rose-600">{finTotals.expenses.toLocaleString()} ر.س</div>
+              <div className="text-2xl font-black text-rose-600">{finTotals.expenses.toLocaleString()} ر.ي</div>
               <div className="text-xs font-black text-slate-400 mt-1">إجمالي المصروفات</div>
             </div>
             <div className={`p-8 rounded-[3rem] shadow-xl text-white ${finTotals.net >= 0 ? 'bg-primary' : 'bg-rose-500'}`}>
-              <div className="text-2xl font-black">{finTotals.net >= 0 ? '+' : ''}{finTotals.net.toLocaleString()} ر.س</div>
+              <div className="text-2xl font-black">{finTotals.net >= 0 ? '+' : ''}{finTotals.net.toLocaleString()} ر.ي</div>
               <div className="text-xs font-black text-white/70 mt-1">صافي الربح</div>
             </div>
           </div>
@@ -190,10 +190,10 @@ export default function AdminReports() {
                   {financialRows.map(row => (
                     <div key={row.key} className="grid grid-cols-4 px-8 py-5 hover:bg-slate-50/80 transition-all items-center">
                       <span className="font-black text-slate-700">{row.label}</span>
-                      <span className="text-center font-bold text-emerald-600">{row.income.toLocaleString()} ر.س</span>
-                      <span className="text-center font-bold text-rose-500">{row.expenses.toLocaleString()} ر.س</span>
+                      <span className="text-center font-bold text-emerald-600">{row.income.toLocaleString()} ر.ي</span>
+                      <span className="text-center font-bold text-rose-500">{row.expenses.toLocaleString()} ر.ي</span>
                       <span className={`text-left font-black text-lg ${row.net >= 0 ? 'text-primary' : 'text-rose-600'}`}>
-                        {row.net >= 0 ? '+' : ''}{row.net.toLocaleString()} ر.س
+                        {row.net >= 0 ? '+' : ''}{row.net.toLocaleString()} ر.ي
                       </span>
                     </div>
                   ))}
@@ -278,7 +278,7 @@ export default function AdminReports() {
                   </div>
                   <div className="pt-4 border-t border-slate-50">
                     <div className="text-xs font-black text-slate-400 mb-1">الإيرادات المحققة</div>
-                    <div className="text-2xl font-black text-primary">{doc.revenue.toLocaleString()} <span className="text-sm">ر.س</span></div>
+                    <div className="text-2xl font-black text-primary">{doc.revenue.toLocaleString()} <span className="text-sm">ر.ي</span></div>
                     {/* Revenue bar relative to top doctor */}
                     <div className="mt-2 h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div className="h-full bg-primary rounded-full transition-all"

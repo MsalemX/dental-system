@@ -79,105 +79,53 @@ export interface Procedure {
 export interface MedicalFile {
   id: string;
   patientId: string;
+  patientName?: string;
+  doctorName?: string;
   type: 'xray' | 'document' | 'photo';
+  photoVariant?: 'before' | 'after';
   filename: string;
   url: string;
   uploadedAt: string;
   notes?: string;
 }
 
-const INITIAL_APPOINTMENTS: Appointment[] = [
-  { id: 'app_1', patientId: 'patient_1', patientName: 'فهد العتيبي', doctor: 'د. سارة محمود', date: '2026-04-15', time: '10:30 ص', status: 'confirmed', type: 'تقويم أسنان' },
-  { id: 'app_2', patientId: 'patient_2', patientName: 'سارة الشمري', doctor: 'د. ياسر العتيبي', date: '2026-04-15', time: '11:15 ص', status: 'pending', type: 'تنظيف أسنان' },
-  { id: 'app_3', patientId: 'patient_3', patientName: 'محمد القحطاني', doctor: 'د. ليلي خالد', date: '2026-04-15', time: '01:00 م', status: 'arrived', type: 'خلع ضرس' },
-  { id: 'app_4', patientId: 'patient_4', patientName: 'نورة الدوسري', doctor: 'د. أحمد سليمان', date: '2026-04-16', time: '09:00 ص', status: 'confirmed', type: 'حشوات تجميلية' },
-  { id: 'app_5', patientId: 'patient_5', patientName: 'عبدالله العنزي', doctor: 'د. سارة محمود', date: '2026-04-16', time: '02:30 م', status: 'pending', type: 'كشف دوري' },
-  { id: 'app_6', patientId: 'patient_6', patientName: 'ريم المطيري', doctor: 'د. ياسر العتيبي', date: '2026-04-17', time: '10:00 ص', status: 'confirmed', type: 'تبييض أسنان' },
-  { id: 'app_7', patientId: 'patient_7', patientName: 'خالد الزهراني', doctor: 'د. ليلي خالد', date: '2026-04-12', time: '04:00 م', status: 'completed', type: 'تركيبات' },
-  { id: 'app_8', patientId: 'patient_8', patientName: 'هيا السبيعي', doctor: 'د. أحمد سليمان', date: '2026-04-12', time: '11:30 ص', status: 'no-show', type: 'كشف دوري' },
-  { id: 'app_9', patientId: 'patient_9', patientName: 'سلطان الحربي', doctor: 'د. سارة محمود', date: '2026-04-10', time: '01:30 م', status: 'completed', type: 'علاج عصب' },
-  { id: 'app_10', patientId: 'patient_10', patientName: 'مروج الغامدي', doctor: 'د. ياسر العتيبي', date: '2026-04-11', time: '05:00 م', status: 'cancelled', type: 'تنظيف أسنان' },
-];
+const INITIAL_APPOINTMENTS: Appointment[] = [];
 
-const INITIAL_BILLS: Bill[] = [
-  { id: 'bill_1', patientId: 'patient_1', patientName: 'فهد العتيبي', doctorName: 'د. سارة محمود', serviceName: 'تقويم أسنان', amount: 500, discount: 50, total: 450, status: 'unpaid', date: '2026-04-15' },
-  { id: 'bill_2', patientId: 'patient_7', patientName: 'خالد الزهراني', doctorName: 'د. ليلي خالد', serviceName: 'تركيبات', amount: 1200, discount: 100, total: 1100, status: 'paid', date: '2026-04-12' },
-  { id: 'bill_3', patientId: 'patient_9', patientName: 'سلطان الحربي', doctorName: 'د. سارة محمود', serviceName: 'علاج عصب', amount: 800, discount: 0, total: 800, status: 'paid', date: '2026-04-10' },
-  { id: 'bill_4', patientId: 'patient_3', patientName: 'محمد القحطاني', doctorName: 'د. ليلي خالد', serviceName: 'خلع ضرس', amount: 350, discount: 0, total: 350, status: 'unpaid', date: '2026-04-15' },
-  { id: 'bill_5', patientId: 'patient_4', patientName: 'نورة الدوسري', doctorName: 'د. أحمد سليمان', serviceName: 'حشوات تجميلية', amount: 450, discount: 45, total: 405, status: 'unpaid', date: '2026-04-16' },
-];
+const INITIAL_BILLS: Bill[] = [];
 
-const INITIAL_RECORDS: MedicalRecord[] = [
-  {
-    id: 'rec_1',
-    patientId: 'patient_1',
-    patientName: 'فهد العتيبي',
-    doctorId: 'doctor_1',
-    doctorName: 'د. سارة محمود',
-    date: '2026-04-10',
-    diagnosis: 'تسوس عميق في الضرس العلوي الأيمن',
-    treatment: 'تنظيف التسوس ووضع حشوة مؤقتة',
-    notes: 'يحتاج لمراجعة بعد أسبوع لاستكمال الحشوة الدائمة',
-    procedures: [{ id: 'proc_1', service: 'كشف وحشوة مؤقتة', price: 200, notes: '' }]
-  },
-  {
-    id: 'rec_2',
-    patientId: 'patient_9',
-    patientName: 'سلطان الحربي',
-    doctorId: 'doctor_1',
-    doctorName: 'د. سارة محمود',
-    date: '2026-04-10',
-    diagnosis: 'التهاب في العصب',
-    treatment: 'بدء علاج العصب وتنظيف القنوات',
-    notes: 'تم صرف مضاد حيوي ومسكن',
-    procedures: [{ id: 'proc_2', service: 'علاج عصب - مرحلة أولى', price: 400, notes: '' }]
-  },
-  {
-    id: 'rec_3',
-    patientId: 'patient_7',
-    patientName: 'خالد الزهراني',
-    doctorId: 'doctor_2',
-    doctorName: 'د. ليلي خالد',
-    date: '2026-04-12',
-    diagnosis: 'فقدان الضرس رقم 14',
-    treatment: 'تركيب جسر ثابت',
-    notes: 'الجسر مركب بنجاح والمريض مرتاح للنتيجة',
-    procedures: [{ id: 'proc_3', service: 'تركيب جسر ثابت', price: 1200, notes: '' }]
-  }
-];
+const INITIAL_RECORDS: MedicalRecord[] = [];
 
-const INITIAL_EXPENSES: Expense[] = [
-  { id: 'exp_1', category: 'materials', description: 'مواد حشو تجميلية', amount: 2500, date: '2026-04-01', notes: 'حشوات زرقاء وأبيض' },
-  { id: 'exp_2', category: 'lab', description: 'مختبر خارجي - تيجان', amount: 1800, date: '2026-04-05', notes: 'تيجان زركونيا' },
-  { id: 'exp_3', category: 'salary', description: 'رواتب الموظفين', amount: 15000, date: '2026-04-01', notes: 'رواتب شهر أبريل' },
-  { id: 'exp_4', category: 'utilities', description: 'فواتير الكهرباء والماء', amount: 1200, date: '2026-04-10', notes: 'شهر مارس' },
-];
+const INITIAL_EXPENSES: Expense[] = [];
 
-const INITIAL_INVENTORY: InventoryItem[] = [
-  { id: 'inv_1', name: 'حشوة مؤقتة', category: 'مواد حشو', currentStock: 15, minStock: 10, unit: 'علبة', supplier: 'شركة الأدوية الطبية', lastRestocked: '2026-03-15' },
-  { id: 'inv_2', name: 'مخدر موضعي', category: 'مخدرات', currentStock: 8, minStock: 15, unit: 'قارورة', supplier: 'مستشفى الملك فيصل', lastRestocked: '2026-03-20' },
-  { id: 'inv_3', name: 'قفازات طبية', category: 'أدوات وقائية', currentStock: 50, minStock: 20, unit: 'علبة', supplier: 'شركة الوقاية الصحية', lastRestocked: '2026-04-01' },
-  { id: 'inv_4', name: 'فرشاة تنظيف', category: 'أدوات', currentStock: 25, minStock: 10, unit: 'علبة', supplier: 'أدوات طبية العربية', lastRestocked: '2026-03-25' },
-];
+const INITIAL_INVENTORY: InventoryItem[] = [];
 
-const INITIAL_DENTAL_CHARTS: DentalChart[] = [
-  {
-    patientId: 'patient_1',
-    teeth: {
-      '11': { toothId: '11', condition: 'cavity', procedures: [{ id: 'p1', type: 'حشوة مؤقتة', date: '2026-04-10' }], notes: 'تسوس عميق' },
-      '12': { toothId: '12', condition: 'healthy', procedures: [], notes: '' },
-      '13': { toothId: '13', condition: 'filling', procedures: [{ id: 'p2', type: 'حشوة دائمة', date: '2026-03-15' }], notes: 'حشوة قديمة' },
-    }
-  }
-];
+const INITIAL_DENTAL_CHARTS: DentalChart[] = [];
 
-const INITIAL_MEDICAL_FILES: MedicalFile[] = [
-  { id: 'file_1', patientId: 'patient_1', type: 'xray', filename: 'xray_tooth11.jpg', url: '/xray_tooth11.jpg', uploadedAt: '2026-04-10', notes: 'أشعة الضرس 11' },
-  { id: 'file_2', patientId: 'patient_7', type: 'xray', filename: 'xray_bridge.jpg', url: '/xray_bridge.jpg', uploadedAt: '2026-04-12', notes: 'أشعة الجسر' },
-];
+const INITIAL_MEDICAL_FILES: MedicalFile[] = [];
+
+const ensureCleanStart = () => {
+  if (typeof window === 'undefined') return;
+  const marker = localStorage.getItem('juman_clean_start_v1');
+  if (marker) return;
+
+  const keys = [
+    'juman_appointments',
+    'juman_bills',
+    'juman_records',
+    'juman_expenses',
+    'juman_inventory',
+    'juman_dental_charts',
+    'juman_medical_files',
+    'juman_installments',
+  ];
+
+  keys.forEach((key) => localStorage.removeItem(key));
+  localStorage.setItem('juman_clean_start_v1', '1');
+};
 
 export const getAppointments = (): Appointment[] => {
   if (typeof window === 'undefined') return INITIAL_APPOINTMENTS;
+  ensureCleanStart();
   const stored = localStorage.getItem('juman_appointments');
   return stored ? JSON.parse(stored) : INITIAL_APPOINTMENTS;
 };
@@ -237,6 +185,7 @@ export const deleteAppointment = (id: string) => {
 
 export const getBills = (): Bill[] => {
   if (typeof window === 'undefined') return INITIAL_BILLS;
+  ensureCleanStart();
   const stored = localStorage.getItem('juman_bills');
   return stored ? JSON.parse(stored) : INITIAL_BILLS;
 };
@@ -256,7 +205,7 @@ export const payBill = (id: string) => {
   localStorage.setItem('juman_bills', JSON.stringify(updated));
   // Trigger notification
   if (bill && typeof window !== 'undefined') {
-    addNotification({ type: 'bill_paid', title: 'تم الدفع ✅', message: `دفع ${bill.patientName} فاتورة ${bill.serviceName} بقيمة ${bill.total} ر.س` });
+    addNotification({ type: 'bill_paid', title: 'تم الدفع ✅', message: `دفع ${bill.patientName} فاتورة ${bill.serviceName} بقيمة ${bill.total} ر.ي` });
   }
 };
 
@@ -295,6 +244,7 @@ export interface MedicalRecord {
 
 export const getMedicalRecords = (): MedicalRecord[] => {
   if (typeof window === 'undefined') return INITIAL_RECORDS;
+  ensureCleanStart();
   const stored = localStorage.getItem('juman_records');
   return stored ? JSON.parse(stored) : INITIAL_RECORDS;
 };
@@ -337,6 +287,7 @@ export const updateMedicalRecord = (id: string, data: Partial<MedicalRecord>) =>
 // Expenses functions
 export const getExpenses = (): Expense[] => {
   if (typeof window === 'undefined') return INITIAL_EXPENSES;
+  ensureCleanStart();
   const stored = localStorage.getItem('juman_expenses');
   return stored ? JSON.parse(stored) : INITIAL_EXPENSES;
 };
@@ -363,6 +314,7 @@ export const deleteExpense = (id: string) => {
 // Inventory functions
 export const getInventory = (): InventoryItem[] => {
   if (typeof window === 'undefined') return INITIAL_INVENTORY;
+  ensureCleanStart();
   const stored = localStorage.getItem('juman_inventory');
   return stored ? JSON.parse(stored) : INITIAL_INVENTORY;
 };
@@ -391,6 +343,7 @@ export const getDentalChart = (patientId: string): DentalChart | null => {
   if (typeof window === 'undefined') {
     return INITIAL_DENTAL_CHARTS.find(c => c.patientId === patientId) || null;
   }
+  ensureCleanStart();
   const stored = localStorage.getItem('juman_dental_charts');
   const charts: DentalChart[] = stored ? JSON.parse(stored) : INITIAL_DENTAL_CHARTS;
   return charts.find(c => c.patientId === patientId) || null;
@@ -407,6 +360,7 @@ export const updateDentalChart = (patientId: string, chart: DentalChart) => {
 // Medical Files functions
 export const getMedicalFiles = (patientId?: string): MedicalFile[] => {
   if (typeof window === 'undefined') return INITIAL_MEDICAL_FILES;
+  ensureCleanStart();
   const stored = localStorage.getItem('juman_medical_files');
   const files: MedicalFile[] = stored ? JSON.parse(stored) : INITIAL_MEDICAL_FILES;
   return patientId ? files.filter(f => f.patientId === patientId) : files;
@@ -428,6 +382,7 @@ export const deleteMedicalFile = (id: string) => {
 // Installments functions
 export const getInstallments = (billId?: string): Installment[] => {
   if (typeof window === 'undefined') return [];
+  ensureCleanStart();
   const stored = localStorage.getItem('juman_installments');
   const installments: Installment[] = stored ? JSON.parse(stored) : [];
   return billId ? installments.filter(i => i.billId === billId) : installments;

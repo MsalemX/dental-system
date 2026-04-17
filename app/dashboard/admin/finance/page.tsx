@@ -187,7 +187,7 @@ export default function FinanceDashboard() {
             <span className="text-xs font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full">{filteredIncome.length} فاتورة</span>
           </div>
           <h4 className="text-slate-400 font-black text-xs uppercase tracking-widest">إجمالي الإيرادات</h4>
-          <div className="text-3xl font-black text-emerald-600 mt-2">{totalIncome.toLocaleString()} <span className="text-sm">ر.س</span></div>
+          <div className="text-3xl font-black text-emerald-600 mt-2">{totalIncome.toLocaleString()} <span className="text-sm">ر.ي</span></div>
         </div>
 
         <div className="bg-white p-8 rounded-[3rem] border border-rose-100 shadow-xl shadow-rose-50">
@@ -196,14 +196,14 @@ export default function FinanceDashboard() {
             <span className="text-xs font-black text-rose-500 bg-rose-50 px-3 py-1 rounded-full">{filteredExpenses.length} قيد</span>
           </div>
           <h4 className="text-slate-400 font-black text-xs uppercase tracking-widest">إجمالي المصروفات</h4>
-          <div className="text-3xl font-black text-rose-600 mt-2">{totalExpenses.toLocaleString()} <span className="text-sm">ر.س</span></div>
+          <div className="text-3xl font-black text-rose-600 mt-2">{totalExpenses.toLocaleString()} <span className="text-sm">ر.ي</span></div>
         </div>
 
         <div className={`p-8 rounded-[3rem] shadow-xl text-white relative overflow-hidden ${netProfit >= 0 ? 'bg-primary shadow-primary/20' : 'bg-rose-500 shadow-rose-500/20'}`}>
           <div className="relative z-10">
             <div className="p-3 bg-white/20 rounded-2xl text-white text-xl w-fit mb-4">💎</div>
             <h4 className="text-white/70 font-black text-xs uppercase tracking-widest">صافي الربح</h4>
-            <div className="text-3xl font-black mt-2">{netProfit >= 0 ? '+' : ''}{netProfit.toLocaleString()} <span className="text-sm">ر.س</span></div>
+            <div className="text-3xl font-black mt-2">{netProfit >= 0 ? '+' : ''}{netProfit.toLocaleString()} <span className="text-sm">ر.ي</span></div>
           </div>
           <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
         </div>
@@ -219,10 +219,10 @@ export default function FinanceDashboard() {
               {chartData.map((d) => (
                 <div key={d.key} className="flex-1 flex flex-col items-center gap-1">
                   <div className="flex items-end gap-1 w-full h-40">
-                    <div title={`إيرادات: ${d.income} ر.س`}
+                    <div title={`إيرادات: ${d.income} ر.ي`}
                       className="flex-1 bg-emerald-400 rounded-t-xl transition-all hover:bg-emerald-500 cursor-pointer"
                       style={{ height: `${d.income > 0 ? Math.max((d.income / chartMax) * 100, 4) : 0}%` }} />
-                    <div title={`مصروفات: ${d.expenses} ر.س`}
+                    <div title={`مصروفات: ${d.expenses} ر.ي`}
                       className="flex-1 bg-rose-300 rounded-t-xl transition-all hover:bg-rose-400 cursor-pointer"
                       style={{ height: `${d.expenses > 0 ? Math.max((d.expenses / chartMax) * 100, 4) : 0}%` }} />
                   </div>
@@ -247,7 +247,7 @@ export default function FinanceDashboard() {
                 <div key={cat} className="space-y-1.5">
                   <div className="flex justify-between text-sm font-black">
                     <span className="text-slate-600">{CATEGORY_ICONS[cat as ExpenseCategory]} {cat}</span>
-                    <span className="text-slate-800">{amt.toLocaleString()} ر.س</span>
+                    <span className="text-slate-800">{amt.toLocaleString()} ر.ي</span>
                   </div>
                   <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-rose-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
@@ -264,7 +264,7 @@ export default function FinanceDashboard() {
         <div className="bg-white rounded-[3rem] border border-slate-100 shadow-xl overflow-hidden">
           <div className="p-8 border-b border-slate-50 flex justify-between items-center">
             <h3 className="text-lg font-black text-slate-800">سجل الإيرادات</h3>
-            <span className="text-sm font-bold text-slate-400">{filteredIncome.length} إيراد — الإجمالي: {totalIncome.toLocaleString()} ر.س</span>
+            <span className="text-sm font-bold text-slate-400">{filteredIncome.length} إيراد — الإجمالي: {totalIncome.toLocaleString()} ر.ي</span>
           </div>
           {filteredIncome.length === 0 ? (
             <div className="p-20 text-center"><div className="text-6xl mb-4">📭</div><p className="text-slate-400 font-bold">لا توجد فواتير مدفوعة في هذه الفترة</p></div>
@@ -286,11 +286,11 @@ export default function FinanceDashboard() {
                   {bill.discount > 0 && (
                     <div className="text-center shrink-0 w-24">
                       <div className="text-xs font-black text-slate-400">خصم</div>
-                      <div className="font-bold text-rose-500 text-sm">- {bill.discount} ر.س</div>
+                      <div className="font-bold text-rose-500 text-sm">- {bill.discount} ر.ي</div>
                     </div>
                   )}
                   <div className="text-left shrink-0">
-                    <div className="text-xl font-black text-emerald-600">{bill.total.toLocaleString()} <span className="text-xs font-bold text-slate-400">ر.س</span></div>
+                    <div className="text-xl font-black text-emerald-600">{bill.total.toLocaleString()} <span className="text-xs font-bold text-slate-400">ر.ي</span></div>
                   </div>
                 </div>
               ))}
@@ -303,7 +303,7 @@ export default function FinanceDashboard() {
       {activeTab === 'expenses' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <p className="text-sm font-bold text-slate-400">{filteredExpenses.length} قيد — الإجمالي: {totalExpenses.toLocaleString()} ر.س</p>
+            <p className="text-sm font-bold text-slate-400">{filteredExpenses.length} قيد — الإجمالي: {totalExpenses.toLocaleString()} ر.ي</p>
             <button onClick={openAdd} className="bg-primary text-white font-black px-6 py-3 rounded-[1.2rem] shadow-lg shadow-primary/30 hover:scale-105 transition-all flex items-center gap-2">
               <span>➕</span> إضافة مصروف
             </button>
@@ -329,7 +329,7 @@ export default function FinanceDashboard() {
                       <div className="font-bold text-slate-600 text-sm">{exp.date}</div>
                     </div>
                     <div className="text-xl font-black text-rose-600 shrink-0">
-                      {exp.amount.toLocaleString()} <span className="text-xs font-bold text-slate-400">ر.س</span>
+                      {exp.amount.toLocaleString()} <span className="text-xs font-bold text-slate-400">ر.ي</span>
                     </div>
                     <div className="flex gap-1.5 shrink-0">
                       <button onClick={() => openEdit(exp)} className="h-9 px-3 bg-slate-100 text-slate-600 font-black text-xs rounded-xl hover:bg-primary hover:text-white transition-all">تعديل</button>
@@ -379,7 +379,7 @@ export default function FinanceDashboard() {
               {/* Amount & Date */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">المبلغ (ر.س)</label>
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">المبلغ (ر.ي)</label>
                   <input type="number" required min={1} value={form.amount} onChange={e => setForm(f => ({ ...f, amount: Number(e.target.value) }))}
                     className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary" />
                 </div>
@@ -431,7 +431,7 @@ export default function FinanceDashboard() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">المبلغ (ر.س)</label>
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">المبلغ (ر.ي)</label>
                   <input type="number" min={1} required value={installmentForm.amount} onChange={e => setInstallmentForm(f => ({ ...f, amount: Number(e.target.value) }))}
                     className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary" />
                 </div>
@@ -468,7 +468,7 @@ export default function FinanceDashboard() {
                     <div key={inst.id} className="bg-white p-4 rounded-2xl border border-rose-200">
                       <div className="font-black text-rose-800">{bill?.patientName}</div>
                       <div className="text-sm text-rose-600">
-                        {inst.amount} ر.س • تاريخ الاستحقاق: {inst.dueDate}
+                        {inst.amount} ر.ي • تاريخ الاستحقاق: {inst.dueDate}
                       </div>
                       <button
                         onClick={() => {
@@ -515,7 +515,7 @@ export default function FinanceDashboard() {
                       return (
                         <tr key={inst.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-6 py-4 font-black text-slate-800">{bill?.patientName || 'غير معروف'}</td>
-                          <td className="px-6 py-4 font-bold text-slate-600">{inst.amount} ر.س</td>
+                          <td className="px-6 py-4 font-bold text-slate-600">{inst.amount} ر.ي</td>
                           <td className="px-6 py-4 font-bold text-slate-600">{inst.dueDate}</td>
                           <td className="px-6 py-4">
                             <span className={`text-xs font-black px-3 py-1 rounded-full ${inst.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :

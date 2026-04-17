@@ -119,7 +119,7 @@ export default function EmployeeBilling() {
           <div>
             <div className="text-[10px] font-black text-slate-400 mb-1">إيرادات المحصلة اليوم</div>
             <div className="text-3xl font-black text-emerald-500">
-              {bills.filter(b => b.status === 'paid' && b.date === new Date().toISOString().split('T')[0]).reduce((s, b) => s + b.total, 0)} <span className="text-sm font-black">ر.س</span>
+              {bills.filter(b => b.status === 'paid' && b.date === new Date().toISOString().split('T')[0]).reduce((s, b) => s + b.total, 0)} <span className="text-sm font-black">ر.ي</span>
             </div>
           </div>
           <div className="text-3xl">💰</div>
@@ -172,7 +172,7 @@ export default function EmployeeBilling() {
                     </td>
                     <td className="p-6 font-bold text-slate-500 text-sm">{bill.serviceName}</td>
                     <td className="p-6 text-center">
-                      <div className="text-lg font-black text-slate-800">{bill.total.toLocaleString()} ر.س</div>
+                      <div className="text-lg font-black text-slate-800">{bill.total.toLocaleString()} ر.ي</div>
                       {bill.discount > 0 && <div className="text-[10px] font-bold text-rose-400 line-through">{bill.amount.toLocaleString()}</div>}
                     </td>
                     <td className="p-6 text-center">
@@ -227,7 +227,7 @@ export default function EmployeeBilling() {
                   setForm({ ...form, serviceName: e.target.value, amount: s ? s.price : 0 });
                 }} className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-4 font-bold text-slate-700">
                   <option value="">اختر خدمة...</option>
-                  {services.map(s => <option key={s.id} value={s.name}>{s.name} ({s.price} ر.س)</option>)}
+                  {services.map(s => <option key={s.id} value={s.name}>{s.name} ({s.price} ر.ي)</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -243,7 +243,7 @@ export default function EmployeeBilling() {
               <div className="p-6 bg-primary/5 rounded-3xl text-center space-y-4">
                 <div className="flex flex-col gap-1">
                   <div className="text-xs font-black text-primary uppercase">صافي الفاتورة</div>
-                  <div className="text-4xl font-black text-primary">{total.toLocaleString()} <span className="text-lg">ر.س</span></div>
+                  <div className="text-4xl font-black text-primary">{total.toLocaleString()} <span className="text-lg">ر.ي</span></div>
                 </div>
 
                 <div className="pt-4 border-t border-primary/10">
@@ -312,17 +312,17 @@ export default function EmployeeBilling() {
                 </div>
                 <div className="flex justify-between items-center pt-2">
                   <span className="font-black text-slate-700">{printingBill.serviceName}</span>
-                  <span className="font-bold text-slate-700">{printingBill.amount.toLocaleString()} ر.س</span>
+                  <span className="font-bold text-slate-700">{printingBill.amount.toLocaleString()} ر.ي</span>
                 </div>
                 {printingBill.discount > 0 && (
                   <div className="flex justify-between items-center text-rose-500 font-bold">
                     <span>خصم</span>
-                    <span>-{printingBill.discount.toLocaleString()} ر.س</span>
+                    <span>-{printingBill.discount.toLocaleString()} ر.ي</span>
                   </div>
                 )}
                 <div className="pt-6 border-t-2 border-slate-200 flex justify-between items-center">
                   <span className="text-2xl font-black text-slate-800">الإجمالي</span>
-                  <span className="text-3xl font-black text-primary">{printingBill.total.toLocaleString()} ر.س</span>
+                  <span className="text-3xl font-black text-primary">{printingBill.total.toLocaleString()} ر.ي</span>
                 </div>
               </div>
 
