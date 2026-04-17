@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getClinicSettings, updateClinicSettings, getRooms, addRoom, deleteRoom, assignDoctorToRoom, ClinicSettings, Room } from "../../../lib/clinic";
 import { getAllUsers } from "../../../lib/auth";
+import LocationPicker from "../../../components/LocationPicker";
 
 export default function ClinicManagement() {
   const [activeTab, setActiveTab] = useState<'settings' | 'rooms'>('settings');
@@ -16,7 +17,7 @@ export default function ClinicManagement() {
     const fetchData = async () => {
       setSettings(getClinicSettings());
       setRooms(getRooms());
-      
+
       const allUsers = await getAllUsers();
       const allDoctors = allUsers.filter((u: any) => u.role === 'doctor');
       setDoctors(allDoctors);
@@ -80,15 +81,15 @@ export default function ClinicManagement() {
           <h2 className="text-3xl font-black text-slate-800">إدارة العيادة</h2>
           <p className="text-slate-400 font-bold text-sm mt-1">تحديد إعدادات العيادة، أوقات العمل، وإدارة الغرف والأطباء</p>
         </div>
-        
+
         <div className="flex bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm">
-          <button 
+          <button
             onClick={() => setActiveTab('settings')}
             className={`px-6 py-2.5 rounded-xl font-black text-sm transition-all ${activeTab === 'settings' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-400 hover:text-primary'}`}
           >
             ⚙️ إعدادات العيادة
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('rooms')}
             className={`px-6 py-2.5 rounded-xl font-black text-sm transition-all ${activeTab === 'rooms' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-400 hover:text-primary'}`}
           >
@@ -107,36 +108,44 @@ export default function ClinicManagement() {
                   <span className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary text-lg">📝</span>
                   المعلومات الأساسية
                 </h3>
-                
+
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">اسم العيادة</label>
-                    <input 
+                    <input
                       required
-                      type="text" 
+                      type="text"
                       value={settings.name}
-                      onChange={(e) => setSettings({...settings, name: e.target.value})}
+                      onChange={(e) => setSettings({ ...settings, name: e.target.value })}
                       className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary focus:bg-white transition-all"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">رقم هاتف العيادة</label>
-                    <input 
+                    <input
                       required
-                      type="text" 
+                      type="text"
                       value={settings.phone}
-                      onChange={(e) => setSettings({...settings, phone: e.target.value})}
+                      onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
                       className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary focus:bg-white transition-all"
                     />
                   </div>
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">العنوان بالتفصيل</label>
-                    <input 
+                    <input
                       required
-                      type="text" 
+                      type="text"
                       value={settings.address}
-                      onChange={(e) => setSettings({...settings, address: e.target.value})}
+                      onChange={(e) => setSettings({ ...settings, address: e.target.value })}
                       className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary focus:bg-white transition-all"
+                    />
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">تحديد الموقع على الخريطة</label>
+                    <LocationPicker
+                      latitude={settings.latitude}
+                      longitude={settings.longitude}
+                      onLocationChange={(lat, lng) => setSettings({ ...settings, latitude: lat, longitude: lng })}
                     />
                   </div>
                   <div className="md:col-span-2 space-y-2">
@@ -153,7 +162,7 @@ export default function ClinicManagement() {
                           const file = e.target.files?.[0];
                           if (file) {
                             const reader = new FileReader();
-                            reader.onload = ev => setSettings({...settings, logo: ev.target?.result as string});
+                            reader.onload = ev => setSettings({ ...settings, logo: ev.target?.result as string });
                             reader.readAsDataURL(file);
                           }
                         }} />
@@ -172,24 +181,24 @@ export default function ClinicManagement() {
                   <span className="w-10 h-10 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary text-lg">🕒</span>
                   أوقات العمل الأسبوعية
                 </h3>
-                
+
                 <div className="space-y-4">
                   {settings.workingHours.map((wh, idx) => (
                     <div key={wh.day} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${wh.closed ? 'bg-slate-50 border-slate-100' : 'bg-white border-slate-50 hover:border-primary/20'}`}>
                       <div className="w-24 font-black text-slate-700">{wh.day}</div>
-                      
+
                       <div className="flex items-center gap-4">
                         {!wh.closed ? (
                           <>
-                            <input 
-                              type="time" 
+                            <input
+                              type="time"
                               value={wh.start}
                               onChange={(e) => updateWorkingHour(idx, 'start', e.target.value)}
                               className="bg-slate-50 border-0 rounded-xl px-3 py-2 font-bold text-slate-600 focus:ring-2 focus:ring-primary"
                             />
                             <span className="text-slate-300 font-bold">إلى</span>
-                            <input 
-                              type="time" 
+                            <input
+                              type="time"
                               value={wh.end}
                               onChange={(e) => updateWorkingHour(idx, 'end', e.target.value)}
                               className="bg-slate-50 border-0 rounded-xl px-3 py-2 font-bold text-slate-600 focus:ring-2 focus:ring-primary"
@@ -198,8 +207,8 @@ export default function ClinicManagement() {
                         ) : (
                           <span className="text-rose-500 font-black text-sm px-10">مغلق (عطلة نهاية الأسبوع)</span>
                         )}
-                        
-                        <button 
+
+                        <button
                           type="button"
                           onClick={() => updateWorkingHour(idx, 'closed', !wh.closed)}
                           className={`px-4 py-2 rounded-xl font-black text-xs transition-all ${wh.closed ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-50 text-rose-500 hover:bg-rose-100'}`}
@@ -221,7 +230,7 @@ export default function ClinicManagement() {
                   <p className="text-primary-foreground/70 text-sm font-bold leading-relaxed">
                     تأكد من أن جميع المعلومات المدخلة صحيحة، سيتم تحديث بيانات العيادة فوراً لدى جميع المستخدمين.
                   </p>
-                  <button 
+                  <button
                     disabled={isSaving}
                     type="submit"
                     className="w-full mt-8 h-16 bg-white text-primary font-black rounded-2xl shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50"
@@ -243,14 +252,14 @@ export default function ClinicManagement() {
                 <p className="text-slate-400 font-bold text-sm mt-1">إنشاء مساحة عمل للطبيب</p>
               </div>
               <form onSubmit={handleAddRoom} className="w-full space-y-3">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={newRoomName}
                   onChange={(e) => setNewRoomName(e.target.value)}
                   placeholder="اسم الغرفة (مثل: غرفة 3)"
                   className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary"
                 />
-                <button 
+                <button
                   type="submit"
                   className="w-full h-14 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/20"
                 >
@@ -262,13 +271,13 @@ export default function ClinicManagement() {
             {/* Rooms List */}
             {rooms.map((room) => (
               <div key={room.id} className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/50 space-y-6 relative overflow-hidden group">
-                <button 
+                <button
                   onClick={() => handleDeleteRoom(room.id)}
                   className={`absolute top-6 left-6 h-10 px-3 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center transition-all font-black text-[10px] ${deletingRoomId === room.id ? 'bg-rose-500 text-white animate-pulse' : 'opacity-0 group-hover:opacity-100 hover:bg-rose-500 hover:text-white'}`}
                 >
                   {deletingRoomId === room.id ? 'حذف؟' : '🗑️'}
                 </button>
-                
+
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-secondary/10 rounded-[2rem] flex items-center justify-center text-secondary text-2xl">🚪</div>
                   <div>
@@ -279,7 +288,7 @@ export default function ClinicManagement() {
 
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-2">الطبيب المسؤول</label>
-                  <select 
+                  <select
                     value={room.doctorId || 'none'}
                     onChange={(e) => handleAssignDoctor(room.id, e.target.value)}
                     className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary appearance-none cursor-pointer"
