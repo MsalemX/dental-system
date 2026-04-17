@@ -33,7 +33,7 @@ export default function AdminBilling() {
     discount: 0,
     date: new Date().toISOString().split('T')[0],
     notes: '',
-    status: 'unpaid' as 'unpaid' | 'paid',
+    status: 'unpaid' as 'unpaid' | 'paid' | 'installment',
   });
 
   const total = form.amount - form.discount;
@@ -54,7 +54,7 @@ export default function AdminBilling() {
 
   const filtered = useMemo(() =>
     filterStatus === 'all' ? bills : bills.filter(b => b.status === filterStatus)
-  , [bills, filterStatus]);
+    , [bills, filterStatus]);
 
   const stats = useMemo(() => ({
     total: bills.length,
@@ -215,7 +215,7 @@ export default function AdminBilling() {
 
         {/* Filter */}
         <div className="flex gap-3">
-          {([['all','الكل'],['unpaid','غير مدفوعة'],['paid','مدفوعة']] as const).map(([key, label]) => (
+          {([['all', 'الكل'], ['unpaid', 'غير مدفوعة'], ['paid', 'مدفوعة']] as const).map(([key, label]) => (
             <button key={key} onClick={() => setFilterStatus(key)}
               className={`px-6 py-2.5 rounded-2xl font-black text-sm transition-all ${filterStatus === key ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white text-slate-400 border border-slate-100 hover:border-primary/30'}`}>
               {label}
@@ -362,7 +362,7 @@ export default function AdminBilling() {
                 <div className="space-y-2">
                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">حالة الدفع</label>
                   <div className="grid grid-cols-2 gap-3">
-                    {([['unpaid','⏳ غير مدفوعة'],['paid','✅ مدفوعة']] as const).map(([k, lbl]) => (
+                    {([['unpaid', '⏳ غير مدفوعة'], ['paid', '✅ مدفوعة']] as const).map(([k, lbl]) => (
                       <button type="button" key={k} onClick={() => setForm(f => ({ ...f, status: k }))}
                         className={`py-3 rounded-xl font-black text-sm transition-all border-2 ${form.status === k ? (k === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-rose-50 text-rose-600 border-rose-200') : 'bg-slate-50 text-slate-400 border-transparent hover:border-slate-200'}`}>
                         {lbl}

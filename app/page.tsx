@@ -152,6 +152,74 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Before & After Gallery */}
+      <section id="gallery" className="py-24 px-6 md:px-16 bg-slate-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl font-bold text-slate-900">نتائجنا الواقعية</h2>
+            <p className="text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed">
+              شاهد التحولات الرائعة التي حققناها لمرضانا في عيادة جُمان. كل حالة فريدة وكل ابتسامة تستحق الاهتمام.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                category: 'تبييض الأسنان',
+                before: '/before-whitening.jpg',
+                after: '/after-whitening.jpg',
+                description: 'تحول مذهل في لون الأسنان خلال جلسة واحدة'
+              },
+              {
+                category: 'تقويم الأسنان',
+                before: '/before-orthodontics.jpg',
+                after: '/after-orthodontics.jpg',
+                description: 'اصطفاف مثالي للأسنان في 18 شهراً'
+              },
+              {
+                category: 'زراعة الأسنان',
+                before: '/before-implants.jpg',
+                after: '/after-implants.jpg',
+                description: 'استعادة الابتسامة الكاملة بتقنية الزراعة الحديثة'
+              }
+            ].map((case_, idx) => (
+              <div key={idx} className="group relative overflow-hidden rounded-[3rem] bg-white shadow-xl border border-slate-100 hover:shadow-2xl transition-all duration-500">
+                <div className="relative h-80 bg-slate-100">
+                  <div className="absolute inset-0 flex">
+                    <div className="flex-1 relative overflow-hidden">
+                      <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-bold z-10">قبل</div>
+                      <Image
+                        src={case_.before}
+                        alt={`قبل ${case_.category}`}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="flex-1 relative overflow-hidden">
+                      <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-xs font-bold z-10">بعد</div>
+                      <Image
+                        src={case_.after}
+                        alt={`بعد ${case_.category}`}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
+                    <h3 className="text-xl font-bold mb-2">{case_.category}</h3>
+                    <p className="text-sm opacity-90">{case_.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <button className="bg-primary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-xl shadow-primary/30 hover:scale-105 transition-transform">
+              شاهد المزيد من الحالات
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* About Section */}
       <section id="about" className="py-24 px-6 md:px-16 bg-slate-50 relative overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-16 items-center">
@@ -265,11 +333,24 @@ export default function Home() {
           </div>
           <div>
             <h4 className="font-bold text-slate-900 mb-6">تواصل معنا</h4>
-            <ul className="space-y-4 text-slate-500 text-sm">
-              <li className="flex items-center gap-2">📍 الرياض، المملكة العربية السعودية</li>
-              <li className="flex items-center gap-2">📞 920000000</li>
-              <li className="flex items-center gap-2">✉️ info@dentalpro.com</li>
-            </ul>
+            <div className="space-y-4">
+              <div className="h-48 bg-slate-100 rounded-2xl overflow-hidden">
+                <iframe
+                  src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dOWTgaN2-2HqOw&q=24.7136,46.6753"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
+              <ul className="space-y-4 text-slate-500 text-sm">
+                <li className="flex items-center gap-2">📍 الرياض، المملكة العربية السعودية</li>
+                <li className="flex items-center gap-2">📞 920000000</li>
+                <li className="flex items-center gap-2">✉️ info@dentalpro.com</li>
+              </ul>
+            </div>
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-400 text-xs">

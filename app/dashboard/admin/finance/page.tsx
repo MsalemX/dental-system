@@ -1,40 +1,60 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { getBills, Bill } from "../../../lib/data";
-import { getExpenses, addExpense, updateExpense, deleteExpense, Expense, ExpenseCategory, EXPENSE_CATEGORIES } from "../../../lib/finance";
+import { getBills, getExpenses, addExpense, updateExpense, deleteExpense, getInstallments, addInstallment, payInstallment, Bill, Expense, Installment } from "../../../lib/data";
 
-const CATEGORY_ICONS: Record<ExpenseCategory, string> = {
-  'أدوات ومستلزمات': '🔧',
-  'رواتب': '👥',
-  'إيجار': '🏢',
-  'صيانة': '🛠️',
-  'مرافق وخدمات': '💡',
-  'تسويق وإعلان': '📣',
-  'أخرى': '📦',
+const CATEGORY_ICONS: Record<string, string> = {
+  'materials': '🔧',
+  'lab': '🧪',
+  'salary': '👥',
+  'utilities': '💡',
+  'other': '📦',
 };
 
-const MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const CATEGORY_NAMES: Record<string, string> = {
+  'materials': 'مواد ومستلزمات',
+  'lab': 'مختبرات خارجية',
+  'salary': 'رواتب',
+  'utilities': 'مرافق وخدمات',
+  'other': 'أخرى',
+};
+
+const EXPENSE_CATEGORIES = ['materials', 'lab', 'salary', 'utilities', 'other'] as const;
+
+type ExpenseCategory = typeof EXPENSE_CATEGORIES[number];
+
+const MONTH_NAMES = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
 export default function FinanceDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'income' | 'expenses'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'income' | 'expenses' | 'installments'>('overview');
   const [bills, setBills] = useState<Bill[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [installments, setInstallments] = useState<Installment[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isInstallmentModalOpen, setIsInstallmentModalOpen] = useState(false);
   const [editingExp, setEditingExp] = useState<Expense | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>('');
 
-  const [form, setForm] = useState<{ category: ExpenseCategory; amount: number; date: string; notes: string }>({
-    category: 'أدوات ومستلزمات',
+  const [form, setForm] = useState<{ category: ExpenseCategory; description: string; amount: number; date: string; notes: string }>({
+    category: 'materials',
+    description: '',
     amount: 0,
     date: new Date().toISOString().split('T')[0],
     notes: '',
   });
 
+  const [installmentForm, setInstallmentForm] = useState<Omit<Installment, 'id'>>({
+    billId: '',
+    amount: 0,
+    dueDate: new Date().toISOString().split('T')[0],
+    status: 'pending',
+  });
+
   const refresh = () => {
     setBills(getBills());
     setExpenses(getExpenses());
+    setInstallments(getInstallments());
   };
 
   useEffect(() => { refresh(); }, []);
@@ -49,9 +69,14 @@ export default function FinanceDashboard() {
   const filteredIncome = useMemo(() => filterByMonth(income), [income, selectedMonth]);
   const filteredExpenses = useMemo(() => filterByMonth(expenses), [expenses, selectedMonth]);
 
-  const totalIncome = useMemo(() => filteredIncome.reduce((s, b) => s + b.total, 0), [filteredIncome]);
-  const totalExpenses = useMemo(() => filteredExpenses.reduce((s, e) => s + e.amount, 0), [filteredExpenses]);
-  const netProfit = totalIncome - totalExpenses;
+  const totalIncome = useMemo(() => filteredIncome.reduce((sum, bill) => sum + bill.total, 0), [filteredIncome]);
+  const totalExpenses = useMemo(() => filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0), [filteredExpenses]);
+  const netProfit = useMemo(() => totalIncome - totalExpenses, [totalIncome, totalExpenses]);
+
+  const overdueInstallments = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return installments.filter(i => i.status === 'pending' && i.dueDate < today);
+  }, [installments]);
 
   // Expense by category
   const expenseByCategory = useMemo(() => {
@@ -82,14 +107,24 @@ export default function FinanceDashboard() {
 
   const openAdd = () => {
     setEditingExp(null);
-    setForm({ category: 'أدوات ومستلزمات', amount: 0, date: new Date().toISOString().split('T')[0], notes: '' });
+    setForm({ category: 'materials', description: '', amount: 0, date: new Date().toISOString().split('T')[0], notes: '' });
     setIsModalOpen(true);
   };
 
   const openEdit = (exp: Expense) => {
     setEditingExp(exp);
-    setForm({ category: exp.category, amount: exp.amount, date: exp.date, notes: exp.notes });
+    setForm({ category: exp.category, description: exp.description, amount: exp.amount, date: exp.date, notes: exp.notes || '' });
     setIsModalOpen(true);
+  };
+
+  const openAddInstallment = () => {
+    setInstallmentForm({
+      billId: bills[0]?.id || '',
+      amount: 0,
+      dueDate: new Date().toISOString().split('T')[0],
+      status: 'pending',
+    });
+    setIsInstallmentModalOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -98,6 +133,14 @@ export default function FinanceDashboard() {
     else { addExpense(form); }
     setIsModalOpen(false);
     setEditingExp(null);
+    refresh();
+  };
+
+  const handleInstallmentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!installmentForm.billId) return;
+    addInstallment(installmentForm);
+    setIsInstallmentModalOpen(false);
     refresh();
   };
 
@@ -121,12 +164,12 @@ export default function FinanceDashboard() {
               <option value="">كل الأشهر</option>
               {availableMonths.map(m => {
                 const [y, mon] = m.split('-');
-                return <option key={m} value={m}>{MONTH_NAMES[parseInt(mon)-1]} {y}</option>;
+                return <option key={m} value={m}>{MONTH_NAMES[parseInt(mon) - 1]} {y}</option>;
               })}
             </select>
           )}
           <div className="flex bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm gap-1">
-            {([['overview','📊 نظرة عامة'],['income','📈 الإيرادات'],['expenses','📉 المصروفات']] as const).map(([k,l]) => (
+            {([['overview', '📊 نظرة عامة'], ['income', '📈 الإيرادات'], ['expenses', '📉 المصروفات'], ['installments', '💳 الأقساط']] as const).map(([k, l]) => (
               <button key={k} onClick={() => setActiveTab(k)}
                 className={`px-4 py-2 rounded-xl font-black text-sm transition-all ${activeTab === k ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-400 hover:text-primary'}`}>
                 {l}
@@ -277,7 +320,8 @@ export default function FinanceDashboard() {
                       {CATEGORY_ICONS[exp.category]}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-black text-slate-700">{exp.category}</div>
+                      <div className="font-black text-slate-700">{CATEGORY_NAMES[exp.category] || exp.category}</div>
+                      <div className="text-xs font-bold text-slate-400 truncate">{exp.description}</div>
                       {exp.notes && <div className="text-xs font-bold text-slate-400 truncate">{exp.notes}</div>}
                     </div>
                     <div className="text-center shrink-0 w-24">
@@ -319,10 +363,17 @@ export default function FinanceDashboard() {
                   {EXPENSE_CATEGORIES.map(cat => (
                     <button key={cat} type="button" onClick={() => setForm(f => ({ ...f, category: cat }))}
                       className={`py-3 px-4 rounded-xl font-bold text-sm transition-all border-2 flex items-center gap-2 ${form.category === cat ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-slate-50 text-slate-400 border-transparent hover:border-slate-200'}`}>
-                      <span>{CATEGORY_ICONS[cat]}</span> {cat}
+                      <span>{CATEGORY_ICONS[cat]}</span> {CATEGORY_NAMES[cat]}
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">الوصف</label>
+                <input type="text" required value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary"
+                  placeholder="مثال: شراء مواد تعبئة" />
               </div>
 
               {/* Amount & Date */}
@@ -354,6 +405,148 @@ export default function FinanceDashboard() {
                 <button type="button" onClick={() => setIsModalOpen(false)} className="h-16 px-8 bg-slate-100 text-slate-500 font-black rounded-2xl hover:bg-slate-200 transition-all">إلغاء</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {isInstallmentModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsInstallmentModalOpen(false)} />
+          <div className="bg-white w-full max-w-lg rounded-[3rem] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-10 border-b border-slate-50">
+              <h3 className="text-2xl font-black text-slate-800">إضافة قسط جديد</h3>
+              <p className="text-slate-400 font-bold text-sm mt-1">سجل الدفعة القادمة لخطط التقسيط والعروض المتبقية</p>
+            </div>
+            <form onSubmit={handleInstallmentSubmit} className="p-10 space-y-6">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest">مريض / فاتورة</label>
+                <select required value={installmentForm.billId} onChange={e => setInstallmentForm(f => ({ ...f, billId: e.target.value }))}
+                  className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary">
+                  <option value="">اختر فاتورة</option>
+                  {bills.map(bill => (
+                    <option key={bill.id} value={bill.id}>{bill.patientName} — {bill.serviceName}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">المبلغ (ر.س)</label>
+                  <input type="number" min={1} required value={installmentForm.amount} onChange={e => setInstallmentForm(f => ({ ...f, amount: Number(e.target.value) }))}
+                    className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">تاريخ الاستحقاق</label>
+                  <input type="date" required value={installmentForm.dueDate} onChange={e => setInstallmentForm(f => ({ ...f, dueDate: e.target.value }))}
+                    className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary" />
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button type="submit" className="flex-1 h-16 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/30 hover:scale-[1.02] transition-all">حفظ القسط</button>
+                <button type="button" onClick={() => setIsInstallmentModalOpen(false)} className="h-16 px-8 bg-slate-100 text-slate-500 font-black rounded-2xl hover:bg-slate-200 transition-all">إلغاء</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Installments Tab ─── */}
+      {activeTab === 'installments' && (
+        <div className="space-y-6">
+          {/* Overdue Alert */}
+          {overdueInstallments.length > 0 && (
+            <div className="bg-rose-50 border border-rose-200 rounded-[2rem] p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-2xl">⚠️</div>
+                <h3 className="text-xl font-black text-rose-800">أقساط متأخرة</h3>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {overdueInstallments.map((inst) => {
+                  const bill = bills.find(b => b.id === inst.billId);
+                  return (
+                    <div key={inst.id} className="bg-white p-4 rounded-2xl border border-rose-200">
+                      <div className="font-black text-rose-800">{bill?.patientName}</div>
+                      <div className="text-sm text-rose-600">
+                        {inst.amount} ر.س • تاريخ الاستحقاق: {inst.dueDate}
+                      </div>
+                      <button
+                        onClick={() => {
+                          payInstallment(inst.id);
+                          refresh();
+                        }}
+                        className="mt-2 bg-rose-500 text-white px-3 py-1 rounded-lg text-sm font-bold hover:bg-rose-600"
+                      >
+                        تسديد الآن
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Installments Table */}
+          <div className="bg-white rounded-[3rem] border border-slate-100 shadow-2xl overflow-hidden">
+            <div className="p-8 border-b border-slate-50 flex justify-between items-center">
+              <h3 className="text-xl font-black text-slate-800">جدول الأقساط</h3>
+              <button
+                onClick={openAddInstallment}
+                className="bg-primary text-white font-black px-6 py-3 rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-all"
+              >
+                إضافة قسط
+              </button>
+            </div>
+            {installments.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-6 py-4 text-right font-black text-slate-600">المريض</th>
+                      <th className="px-6 py-4 text-right font-black text-slate-600">المبلغ</th>
+                      <th className="px-6 py-4 text-right font-black text-slate-600">تاريخ الاستحقاق</th>
+                      <th className="px-6 py-4 text-right font-black text-slate-600">الحالة</th>
+                      <th className="px-6 py-4 text-right font-black text-slate-600">الإجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {installments.map((inst) => {
+                      const bill = bills.find(b => b.id === inst.billId);
+                      return (
+                        <tr key={inst.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-6 py-4 font-black text-slate-800">{bill?.patientName || 'غير معروف'}</td>
+                          <td className="px-6 py-4 font-bold text-slate-600">{inst.amount} ر.س</td>
+                          <td className="px-6 py-4 font-bold text-slate-600">{inst.dueDate}</td>
+                          <td className="px-6 py-4">
+                            <span className={`text-xs font-black px-3 py-1 rounded-full ${inst.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
+                                inst.status === 'overdue' ? 'bg-rose-100 text-rose-700' :
+                                  'bg-amber-100 text-amber-700'
+                              }`}>
+                              {inst.status === 'paid' ? 'مدفوع' : inst.status === 'overdue' ? 'متأخر' : 'معلق'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            {inst.status !== 'paid' && (
+                              <button
+                                onClick={() => {
+                                  payInstallment(inst.id);
+                                  refresh();
+                                }}
+                                className="bg-primary text-white font-black px-4 py-2 rounded-xl text-sm hover:bg-primary/90 transition-colors"
+                              >
+                                تسديد
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-20 text-center text-slate-400 font-bold">لا توجد أقساط مسجلة</div>
+            )}
           </div>
         </div>
       )}

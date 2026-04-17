@@ -19,7 +19,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     let active = true;
-    
+
     const checkSession = async () => {
       const session = await getSession();
       if (!active) return;
@@ -74,6 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       { name: "المواعيد", href: "/dashboard/admin/appointments", icon: "📅" },
       { name: "الفواتير", href: "/dashboard/admin/billing", icon: "🧾" },
       { name: "الإدارة المالية", href: "/dashboard/admin/finance", icon: "💰" },
+      { name: "إدارة المخزون", href: "/dashboard/admin/inventory", icon: "📦" },
       { name: "التقارير", href: "/dashboard/admin/reports", icon: "📋" },
       { name: "المرضى", href: "/dashboard/admin/patients", icon: "👥" },
       { name: "إدارة الخدمات", href: "/dashboard/admin/services", icon: "🦷" },
@@ -105,9 +106,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const timeAgo = (iso: string) => {
     const diff = (Date.now() - new Date(iso).getTime()) / 1000;
     if (diff < 60) return 'الآن';
-    if (diff < 3600) return `${Math.floor(diff/60)} دقيقة`;
-    if (diff < 86400) return `${Math.floor(diff/3600)} ساعة`;
-    return `${Math.floor(diff/86400)} يوم`;
+    if (diff < 3600) return `${Math.floor(diff / 60)} دقيقة`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} ساعة`;
+    return `${Math.floor(diff / 86400)} يوم`;
   };
 
   return (
@@ -117,9 +118,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="p-8 border-b border-slate-100 flex items-center gap-3">
           <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-primary/20">
             {clinic?.logo ? (
-                <img src={clinic.logo} alt="Logo" className="w-full h-full object-cover" />
+              <img src={clinic.logo} alt="Logo" className="w-full h-full object-cover" />
             ) : (
-                <span className="text-white font-bold text-xl">J</span>
+              <span className="text-white font-bold text-xl">J</span>
             )}
           </div>
           <span className="text-xl font-bold text-slate-800 tracking-tight leading-tight">
@@ -132,9 +133,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <a
               key={idx}
               href={link.href}
-              className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all font-bold ${
-                pathname === link.href ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105" : "text-slate-500 hover:bg-slate-50 hover:text-primary"
-              }`}
+              className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all font-bold ${pathname === link.href ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105" : "text-slate-500 hover:bg-slate-50 hover:text-primary"
+                }`}
             >
               <span className="text-xl">{link.icon}</span>
               {link.name}

@@ -10,6 +10,9 @@ export interface ClinicSettings {
   logo: string;
   address: string;
   phone: string;
+  email: string;
+  latitude: number;
+  longitude: number;
   workingHours: WorkingDay[];
 }
 
@@ -34,6 +37,9 @@ const DEFAULT_SETTINGS: ClinicSettings = {
   logo: 'https://cdn-icons-png.flaticon.com/512/3467/3467727.png',
   address: 'الرياض، المملكة العربية السعودية',
   phone: '920000000',
+  email: 'info@dentalpro.com',
+  latitude: 24.7136,
+  longitude: 46.6753,
   workingHours: DEFAULT_WORKING_HOURS,
 };
 
@@ -73,7 +79,7 @@ export const deleteRoom = (id: string) => {
 
 export const assignDoctorToRoom = (roomId: string, doctorId: string | undefined) => {
   const rooms = getRooms();
-  const updated = rooms.map((r) => 
+  const updated = rooms.map((r) =>
     r.id === roomId ? { ...r, doctorId } : (r.doctorId === doctorId ? { ...r, doctorId: undefined } : r)
   );
   localStorage.setItem('juman_rooms', JSON.stringify(updated));

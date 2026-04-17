@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { getSession, updateUser, User, getAllUsers, changePassword } from "../../../lib/auth";
 import { clearAllNotifications } from "../../../lib/notifications";
-import { getClinicSettings } from "../../../lib/clinic";
+import { getClinicSettings, updateClinicSettings, ClinicSettings } from "../../../lib/clinic";
 
-type SettingsTab = 'password' | 'permissions' | 'payment' | 'backup' | 'security';
+type SettingsTab = 'password' | 'permissions' | 'payment' | 'clinic' | 'backup' | 'security';
 
 interface SystemSettings {
   paymentMethods: { cash: boolean; card: boolean; insurance: boolean; bankTransfer: boolean };
@@ -37,6 +37,7 @@ export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('password');
   const [user, setUser] = useState<User | null>(null);
   const [settings, setSettings] = useState<SystemSettings>(DEFAULT_SETTINGS);
+  const [clinicSettings, setClinicSettings] = useState<ClinicSettings | null>(null);
   const [saved, setSaved] = useState(false);
 
   // Password form
@@ -51,6 +52,7 @@ export default function AdminSettings() {
       const session = await getSession();
       if (session) setUser(session);
       setSettings(getSystemSettings());
+      setClinicSettings(getClinicSettings());
     };
     init();
   }, []);
@@ -61,14 +63,22 @@ export default function AdminSettings() {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const handleSaveClinicSettings = () => {
+    if (clinicSettings) {
+      updateClinicSettings(clinicSettings);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
+  };
+
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPwError('');
     if (!user) return;
-    
+
     if (newPw.length < 6) { setPwError('كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل'); return; }
     if (newPw !== confirmPw) { setPwError('كلمة المرور الجديدة غير متطابقة'); return; }
-    
+
     const result = await changePassword(newPw);
     if (!result.success) {
       setPwError(result.error || 'حدث خطأ أثناء تحديث كلمة المرور');
@@ -94,7 +104,7 @@ export default function AdminSettings() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `juman-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.download = `juman-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -132,6 +142,7 @@ export default function AdminSettings() {
     { key: 'password', label: 'كلمة المرور', icon: '🔑' },
     { key: 'permissions', label: 'الصلاحيات', icon: '🛡️' },
     { key: 'payment', label: 'طرق الدفع', icon: '💳' },
+    { key: 'clinic', label: 'العيادة', icon: '🏥' },
     { key: 'backup', label: 'النسخ الاحتياطي', icon: '💾' },
     { key: 'security', label: 'الأمان', icon: '🔐' },
   ];
@@ -277,6 +288,58 @@ export default function AdminSettings() {
               ))}
               <button onClick={handleSaveSettings} className="w-full h-14 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/30 hover:scale-[1.02] transition-all">
                 {saved ? '✅ تم الحفظ!' : 'حفظ الإعدادات'}
+              </button>
+            </div>
+          )}
+
+          {/* ── Clinic Tab ── */}
+          {activeTab === 'clinic' && clinicSettings && (
+            <div className="space-y-6 max-w-2xl">
+              <div>
+                <h3 className="text-2xl font-black text-slate-800">إعدادات العيادة</h3>
+                <p className="text-slate-400 font-bold text-sm mt-1">معلومات العيادة وموقعها على الخريطة</p>
+              </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                {[
+                  { key: 'name', label: 'اسم العيادة', type: 'text' },
+                  { key: 'address', label: 'العنوان', type: 'text' },
+                  { key: 'phone', label: 'رقم الهاتف', type: 'tel' },
+                  { key: 'email', label: 'البريد الإلكتروني', type: 'email' },
+                  { key: 'latitude', label: 'خط العرض', type: 'number' },
+                  { key: 'longitude', label: 'خط الطول', type: 'number' },
+                ].map(field => (
+                  <div key={field.key} className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{field.label}</label>
+                    <input
+                      type={field.type}
+                      step={field.type === 'number' ? 'any' : undefined}
+                      value={(clinicSettings[field.key as keyof ClinicSettings] as string | number)}
+                      onChange={e => setClinicSettings(s => s ? ({
+                        ...s,
+                        [field.key]: field.type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value
+                      }) : s)}
+                      className="w-full h-14 bg-slate-50 border-0 rounded-2xl px-6 font-bold text-slate-700 focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-4">
+                <h4 className="font-black text-slate-700">معاينة الخريطة</h4>
+                <div className="h-64 bg-slate-100 rounded-2xl overflow-hidden">
+                  <iframe
+                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dOWTgaN2-2HqOw&q=${clinicSettings.latitude},${clinicSettings.longitude}`}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
+                </div>
+                <p className="text-xs font-bold text-slate-400">يمكنك تعديل خطوط العرض والطول لتحديد الموقع الدقيق على الخريطة</p>
+              </div>
+              <button onClick={handleSaveClinicSettings} className="w-full h-14 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/30 hover:scale-[1.02] transition-all">
+                {saved ? '✅ تم الحفظ!' : 'حفظ إعدادات العيادة'}
               </button>
             </div>
           )}
